@@ -12,7 +12,20 @@
         </template>
       </el-table-column>
       <el-table-column label="操作">
-        <template #default="scope"><el-button :disabled="!scope.row.canAttend" type="primary" @click="go(scope.row.id)">参加考试</el-button></template>
+        <template #default="scope">
+          <el-space>
+            <el-button
+                :disabled="!scope.row.canAttend || scope.row.completed"
+                :type="scope.row.completed ? 'info' : 'primary'"
+                @click="go(scope.row.id)"
+            >
+              {{ scope.row.completed ? '已完成' : '参加考试' }}
+            </el-button>
+            <el-button v-if="scope.row.completed" type="success" plain @click="viewResult(scope.row.recordId)">
+              查看详情
+            </el-button>
+          </el-space>
+        </template>
       </el-table-column>
     </el-table>
   </el-card>
@@ -27,11 +40,17 @@ const load = async()=> {
   const list = (await request.get('/exam/list')).data
   const merged = []
   for (const exam of list) {
-    const rule = (await request.get(`/exam/${exam.id}/can-attend/${user.id}`)).data
-    merged.push({ ...exam, ...rule })
+    const [ruleRes, recordRes] = await Promise.all([
+      request.get(`/exam/${exam.id}/can-attend/${user.id}`),
+      request.get(`/exam/${exam.id}/record/${user.id}`)
+    ])
+    const rule = ruleRes.data
+    const record = recordRes.data
+    merged.push({ ...exam, ...rule, completed: !!record, recordId: record?.id, score: record?.score })
   }
   exams.value = merged
 }
 const go = (id)=> router.push(`/student/exam/${id}`)
+const viewResult = (recordId)=> router.push(`/student/result/${recordId}`)
 onMounted(load)
 </script>
