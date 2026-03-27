@@ -2,7 +2,7 @@
 
 ## 1. 技术栈
 - 后端：Spring Boot 3 + MyBatis + MySQL 5.7
-- 前端：Vue3 + Vite + Element Plus
+- 前端：Vue3 + Vite + Element Plus + Echarts
 
 ## 2. 固定课程（本学期）
 - 高等数学（4学分，64学时）
@@ -65,3 +65,12 @@ npm run dev
 ### 管理员
 - `GET /api/admin/attendance`：学生出勤统计
 - `GET /api/admin/dashboard`：风险统计、均分、平均GPA、出勤率、通过率
+
+## 7. 需求实现核对（对照原始 Prompt）
+- ✅ 两个角色（STUDENT / ADMIN）已实现。
+- ✅ 管理员端：考试创建、题库可视化组卷、成绩列表、答题详情、出勤统计、风险看板已实现。
+- ✅ 学生端：登录记出勤、可参加考试列表、考试作答提交自动判题、成绩/学习状态查看已实现。
+- ✅ 数据库：用户、科目、题库、考试、考试题关联、考试记录、答题记录、登录记录、GPA表全部包含，且登录记录有 `(student_id, login_date)` 唯一约束。
+- ✅ 核心后端逻辑：统一返回结构、自动判题、GPA映射计算、出勤门槛限制考试都已落地。
+- ✅ 看板图表已使用 Echarts（风险分布饼图 + 核心指标柱状图）。
+- ℹ️ 原始 Prompt 中“HIGH/MEDIUM/LOW”规则，已按你的新规则替换为“红/橙/黄/绿（基于 GPA 分段）”。
