@@ -1,6 +1,16 @@
 <template>
   <el-card>
-    <h3>答题详情（学习通风格）</h3>
+    <template #header>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <b>答题详情</b>
+          <div style="margin-top:6px;color:#666;font-size:13px;">
+            学生：{{ meta.studentName || '-' }} ｜ 考试：{{ meta.examName || '-' }} ｜ 提交时间：{{ meta.submitTime || '-' }}
+          </div>
+        </div>
+        <el-button @click="goBack">返回成绩列表</el-button>
+      </div>
+    </template>
     <el-timeline>
       <el-timeline-item v-for="(a,i) in list" :key="a.id" :type="a.isCorrect===1?'success':'danger'">
         <p>{{ i+1 }}. {{ a.content }}</p>
@@ -11,8 +21,18 @@
 </template>
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import request from '@/utils/request';
-const route = useRoute(); const list = ref([])
-onMounted(async()=> list.value=(await request.get(`/exam/record/${route.params.recordId}/answers`)).data)
+const route = useRoute();
+const router = useRouter();
+const list = ref([])
+const meta = ref({})
+
+const goBack = () => router.push('/admin/scores')
+
+onMounted(async () => {
+  const recordId = route.params.recordId
+  list.value = (await request.get(`/exam/record/${recordId}/answers`)).data
+  meta.value = (await request.get(`/exam/record/${recordId}/meta`)).data || {}
+})
 </script>

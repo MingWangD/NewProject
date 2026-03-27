@@ -63,4 +63,9 @@ public class ExamController {
     public ApiResponse<?> answers(@PathVariable Long recordId) {
         return ApiResponse.ok(examRecordMapper.findAnswerDetails(recordId));
     }
+
+    @GetMapping("/record/{recordId}/meta")
+    public ApiResponse<?> recordMeta(@PathVariable Long recordId) {
+        return ApiResponse.ok(examRecordMapper.findRecordMeta(recordId));
+    }
 }

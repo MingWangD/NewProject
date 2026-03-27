@@ -24,6 +24,14 @@ public interface ExamRecordMapper {
     @Select("select a.*, q.content, q.correct_option as correctOption from student_answer_record a join question_bank q on a.question_id=q.id where a.exam_record_id=#{recordId}")
     List<Map<String, Object>> findAnswerDetails(Long recordId);
 
+    @Select("select r.id as recordId, r.exam_id as examId, e.name as examName, r.student_id as studentId, " +
+            "u.real_name as studentName, r.score, r.is_passed as isPassed, r.submit_time as submitTime " +
+            "from student_exam_record r " +
+            "join exams e on r.exam_id=e.id " +
+            "join users u on r.student_id=u.id " +
+            "where r.id=#{recordId}")
+    Map<String, Object> findRecordMeta(Long recordId);
+
     @Select("select avg(score) from student_exam_record")
     Double averageScore();
 
