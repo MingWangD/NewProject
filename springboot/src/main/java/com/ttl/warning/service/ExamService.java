@@ -94,13 +94,13 @@ public class ExamService {
             Question q = new Question();
             q.setId(((Number) item.get("id")).longValue());
             q.setCorrectOption((String) item.get("correctOption"));
-            q.setScore((Integer) item.get("score"));
+            q.setScore(((Number) item.get("score")).intValue());
             questionMap.put(q.getId(), q);
         }
 
         for (SubmitExamRequest.AnswerItem ans : req.getAnswers()) {
             Question q = questionMap.get(ans.getQuestionId());
-            if (q != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption())) {
+            if (q != null && q.getCorrectOption() != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption())) {
                 score += q.getScore();
             }
         }
@@ -116,7 +116,7 @@ public class ExamService {
 
         for (SubmitExamRequest.AnswerItem ans : req.getAnswers()) {
             Question q = questionMap.get(ans.getQuestionId());
-            int correct = q != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption()) ? 1 : 0;
+            int correct = q != null && q.getCorrectOption() != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption()) ? 1 : 0;
             examRecordMapper.insertAnswer(recordId, ans.getQuestionId(), ans.getSelectedOption(), correct);
         }
 

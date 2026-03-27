@@ -21,6 +21,7 @@ public interface ExamMapper {
     @Select("select * from exams where id=#{id}")
     Exam findById(Long id);
 
-    @Select("select q.* from question_bank q join exam_question eq on q.id=eq.question_id where eq.exam_id=#{examId}")
+    @Select("select q.id, q.subject_id as subjectId, q.content, q.option_a as optionA, q.option_b as optionB, q.option_c as optionC, q.option_d as optionD, q.correct_option as correctOption, q.score " +
+            "from question_bank q join exam_question eq on q.id=eq.question_id where eq.exam_id=#{examId}")
     List<Map<String, Object>> findQuestionsByExam(Long examId);
 }
