@@ -1,20 +1,32 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    { path: '/', redirect: '/login' },
-    {
-      path: '/manager',
-      component: () => import('@/views/Manager.vue'),
-      redirect: '/manager/home',
-      children: [
-        { path: 'home', component: () => import('@/views/manager/Home.vue')},
-        { path: 'admin', component: () => import('@/views/manager/Admin.vue')},
-      ]
-    },
-    { path: '/login', component: () => import('@/views/Login.vue') }
-  ]
+const routes = [
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: () => import('@/views/Login.vue') },
+  {
+    path: '/admin',
+    component: () => import('@/layout/AdminLayout.vue'),
+    children: [
+      { path: 'exam-create', component: () => import('@/views/admin/ExamCreate.vue') },
+      { path: 'scores', component: () => import('@/views/admin/ScoreList.vue') },
+      { path: 'answers/:recordId', component: () => import('@/views/admin/AnswerDetail.vue') },
+      { path: 'attendance', component: () => import('@/views/admin/AttendanceStats.vue') },
+      { path: 'dashboard', component: () => import('@/views/admin/Dashboard.vue') }
+    ]
+  },
+  {
+    path: '/student',
+    component: () => import('@/layout/StudentLayout.vue'),
+    children: [
+      { path: 'exams', component: () => import('@/views/student/ExamList.vue') },
+      { path: 'exam/:examId', component: () => import('@/views/student/ExamDo.vue') },
+      { path: 'score', component: () => import('@/views/student/ScoreView.vue') },
+      { path: 'state', component: () => import('@/views/student/LearnState.vue') }
+    ]
+  }
+]
+
+export default createRouter({
+  history: createWebHistory(),
+  routes
 })
-
-export default router

@@ -1,0 +1,162 @@
+CREATE DATABASE IF NOT EXISTS study_warning DEFAULT CHARACTER SET utf8mb4;
+USE study_warning;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(100) NOT NULL,
+  real_name VARCHAR(50) NOT NULL,
+  role ENUM('ADMIN','STUDENT') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS subjects (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(50) NOT NULL UNIQUE,
+  credit INT NOT NULL,
+  total_hours INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS question_bank (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  subject_id BIGINT NOT NULL,
+  content VARCHAR(500) NOT NULL,
+  option_a VARCHAR(255) NOT NULL,
+  option_b VARCHAR(255) NOT NULL,
+  option_c VARCHAR(255) NOT NULL,
+  option_d VARCHAR(255) NOT NULL,
+  correct_option CHAR(1) NOT NULL,
+  score INT NOT NULL DEFAULT 5,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_question_subject(subject_id),
+  CONSTRAINT fk_question_subject FOREIGN KEY(subject_id) REFERENCES subjects(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS exams (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  subject_id BIGINT NOT NULL,
+  total_score INT NOT NULL,
+  pass_score INT NOT NULL,
+  start_time DATETIME NOT NULL,
+  end_time DATETIME NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_exam_subject(subject_id),
+  CONSTRAINT fk_exam_subject FOREIGN KEY(subject_id) REFERENCES subjects(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS exam_question (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  exam_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  UNIQUE KEY uk_exam_question(exam_id, question_id),
+  INDEX idx_eq_exam(exam_id),
+  INDEX idx_eq_question(question_id),
+  CONSTRAINT fk_eq_exam FOREIGN KEY(exam_id) REFERENCES exams(id),
+  CONSTRAINT fk_eq_question FOREIGN KEY(question_id) REFERENCES question_bank(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS student_exam_record (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  exam_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  score INT NOT NULL,
+  is_passed TINYINT NOT NULL,
+  submit_time DATETIME NOT NULL,
+  UNIQUE KEY uk_exam_student_once(exam_id, student_id),
+  INDEX idx_record_exam(exam_id),
+  INDEX idx_record_student(student_id),
+  CONSTRAINT fk_record_exam FOREIGN KEY(exam_id) REFERENCES exams(id),
+  CONSTRAINT fk_record_student FOREIGN KEY(student_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS student_answer_record (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  exam_record_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  selected_option CHAR(1) NOT NULL,
+  is_correct TINYINT NOT NULL,
+  INDEX idx_answer_record(exam_record_id),
+  INDEX idx_answer_question(question_id),
+  CONSTRAINT fk_answer_record FOREIGN KEY(exam_record_id) REFERENCES student_exam_record(id),
+  CONSTRAINT fk_answer_question FOREIGN KEY(question_id) REFERENCES question_bank(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS login_attendance (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  student_id BIGINT NOT NULL,
+  login_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_student_date(student_id, login_date),
+  INDEX idx_attendance_student(student_id),
+  CONSTRAINT fk_attendance_student FOREIGN KEY(student_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS student_gpa (
+  student_id BIGINT PRIMARY KEY,
+  total_credits INT NOT NULL DEFAULT 0,
+  total_grade_point DECIMAL(10,2) NOT NULL DEFAULT 0,
+  gpa DECIMAL(3,1) NOT NULL DEFAULT 0,
+  risk_level ENUM('HIGH','MEDIUM','LOW') NOT NULL DEFAULT 'HIGH',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_gpa_student FOREIGN KEY(student_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 固定本学期课程（学时固定）
+INSERT IGNORE INTO subjects(id, name, credit, total_hours) VALUES
+(1,'高等数学',4,64),
+(2,'数据结构',4,48),
+(3,'操作系统',3,48),
+(4,'计算机网络',3,32),
+(5,'Java程序设计',4,64);
+
+-- 管理员 + 多个学生
+INSERT IGNORE INTO users(id, username, password, real_name, role) VALUES
+(1,'admin','123456','管理员','ADMIN'),
+(2,'stu1','123456','张三','STUDENT'),
+(3,'stu2','123456','李四','STUDENT'),
+(4,'stu3','123456','王五','STUDENT'),
+(5,'stu4','123456','赵六','STUDENT'),
+(6,'stu5','123456','孙七','STUDENT');
+
+-- 示例题库（每门课2题，可继续扩充）
+INSERT IGNORE INTO question_bank(id,subject_id,content,option_a,option_b,option_c,option_d,correct_option,score) VALUES
+(101,1,'极限lim(x→0) sinx/x 等于？','0','1','∞','不存在','B',10),
+(102,1,'导数 d(x^2)/dx = ?','x','2x','x^2','2','B',10),
+(201,2,'栈的特点是？','FIFO','LIFO','随机访问','哈希访问','B',10),
+(202,2,'时间复杂度 O(log n) 常见于？','顺序查找','二分查找','冒泡排序','计数排序','B',10),
+(301,3,'进程切换主要由谁完成？','编译器','操作系统内核','应用程序','数据库','B',10),
+(302,3,'死锁四必要条件不包括？','互斥','请求保持','可剥夺','循环等待','C',10),
+(401,4,'TCP 是哪一层协议？','网络层','传输层','会话层','数据链路层','B',10),
+(402,4,'IP 地址长度(IPv4)是？','16位','32位','64位','128位','B',10),
+(501,5,'Java中继承关键字是？','implements','extends','inherit','instanceof','B',10),
+(502,5,'JVM 主要执行什么？','SQL','字节码','汇编','脚本','B',10);
+
+-- 预置不同出勤：有达标也有不达标（以64学时课阈值43次为例）
+INSERT IGNORE INTO login_attendance(student_id, login_date)
+SELECT 2, DATE_ADD('2026-01-01', INTERVAL seq DAY)
+FROM (
+  SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+  UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19
+  UNION ALL SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
+  UNION ALL SELECT 30 UNION ALL SELECT 31 UNION ALL SELECT 32 UNION ALL SELECT 33 UNION ALL SELECT 34 UNION ALL SELECT 35 UNION ALL SELECT 36 UNION ALL SELECT 37 UNION ALL SELECT 38 UNION ALL SELECT 39
+  UNION ALL SELECT 40 UNION ALL SELECT 41 UNION ALL SELECT 42 UNION ALL SELECT 43 UNION ALL SELECT 44
+) t;
+
+INSERT IGNORE INTO login_attendance(student_id, login_date)
+SELECT 3, DATE_ADD('2026-01-01', INTERVAL seq DAY)
+FROM (
+  SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+  UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19
+  UNION ALL SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24
+) t;
+
+INSERT IGNORE INTO login_attendance(student_id, login_date)
+SELECT 4, DATE_ADD('2026-01-01', INTERVAL seq DAY)
+FROM (
+  SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+  UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19
+  UNION ALL SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
+  UNION ALL SELECT 30 UNION ALL SELECT 31 UNION ALL SELECT 32 UNION ALL SELECT 33 UNION ALL SELECT 34 UNION ALL SELECT 35 UNION ALL SELECT 36 UNION ALL SELECT 37 UNION ALL SELECT 38 UNION ALL SELECT 39
+) t;
