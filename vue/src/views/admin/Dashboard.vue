@@ -53,7 +53,7 @@ const fmt = (v) => ((v ?? 0).toFixed ? (v ?? 0).toFixed(2) : v)
 const pct = (v) => `${((v ?? 0) * 100).toFixed(1)}%`
 const label = (r) => ({ RED: '红色预警', ORANGE: '橙色预警', YELLOW: '黄色预警', GREEN: '正常' }[r] || r)
 const tagType = (r) => ({ RED: 'danger', ORANGE: 'warning', YELLOW: 'warning', GREEN: 'success' }[r] || 'info')
-const desc = (r) => ({ RED: 'GPA < 1.5', ORANGE: '1.5 ≤ GPA < 2.0', YELLOW: '2.0 ≤ GPA ≤ 2.5', GREEN: 'GPA > 2.5' }[r] || '-')
+const desc = (r) => ({ RED: 'GPA < 1.5', ORANGE: '1.5 ≤ GPA < 2.0', YELLOW: '2.0 ≤ GPA < 2.5', GREEN: 'GPA ≥ 2.5' }[r] || '-')
 const color = (r) => ({ RED: '#f56c6c', ORANGE: '#e6a23c', YELLOW: '#f2c94c', GREEN: '#67c23a' }[r] || '#909399')
 
 const renderCharts = async () => {

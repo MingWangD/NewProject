@@ -63,7 +63,7 @@ public class GpaService {
     private String gpaColor(double gpa) {
         if (gpa < 1.5) return "RED";
         if (gpa < 2.0) return "ORANGE";
-        if (gpa <= 2.5) return "YELLOW";
+        if (gpa < 2.5) return "YELLOW";
         return "GREEN";
     }
 
