@@ -13,4 +13,7 @@ public interface SubjectMapper {
 
     @Select("select * from subjects where id=#{id}")
     Subject findById(Long id);
+
+    @Select("select max(total_hours) from subjects")
+    Integer maxTotalHours();
 }

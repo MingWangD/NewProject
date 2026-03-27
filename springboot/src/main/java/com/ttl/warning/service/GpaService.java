@@ -35,9 +35,9 @@ public class GpaService {
         for (Map<String, Object> item : scores) {
             Long studentId = ((Number) item.get("studentId")).longValue();
             Long subjectId = ((Number) item.get("subjectId")).longValue();
-            Integer score = ((Number) item.get("score")).intValue();
+            int percentScore = (int) Math.round(((Number) item.get("percentScore")).doubleValue());
             int credit = creditMap.getOrDefault(subjectId, 0);
-            double point = scoreToPoint(score);
+            double point = scoreToPoint(percentScore);
             StudentGpa gpa = result.computeIfAbsent(studentId, k -> {
                 StudentGpa x = new StudentGpa();
                 x.setStudentId(k);

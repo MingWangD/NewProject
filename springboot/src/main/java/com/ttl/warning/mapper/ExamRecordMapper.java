@@ -30,7 +30,8 @@ public interface ExamRecordMapper {
     @Select("select sum(case when is_passed=1 then 1 else 0 end)*1.0/nullif(count(*),0) from student_exam_record")
     Double passRate();
 
-    @Select("select e.subject_id as subjectId, r.student_id as studentId, max(r.score) as score from student_exam_record r join exams e on r.exam_id=e.id group by e.subject_id, r.student_id")
+    @Select("select e.subject_id as subjectId, r.student_id as studentId, max((r.score * 100.0) / nullif(e.total_score,0)) as percentScore " +
+            "from student_exam_record r join exams e on r.exam_id=e.id group by e.subject_id, r.student_id")
     List<Map<String, Object>> bestScoresBySubjectAndStudent();
 
     @Select("select r.exam_id as examId, e.name as examName, r.score, r.is_passed as isPassed, r.submit_time as submitTime from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId} order by r.submit_time desc")
