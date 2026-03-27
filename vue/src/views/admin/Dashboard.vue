@@ -39,7 +39,6 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import * as echarts from 'echarts'
 import request from '@/utils/request'
 
 const data = ref({})
@@ -48,16 +47,35 @@ const riskChartRef = ref(null)
 const metricChartRef = ref(null)
 let riskChart = null
 let metricChart = null
+let echartsLib = null
 
 const fmt = (v) => ((v ?? 0).toFixed ? (v ?? 0).toFixed(2) : v)
 const pct = (v) => `${((v ?? 0) * 100).toFixed(1)}%`
 const label = (r) => ({ RED: '红色预警', ORANGE: '橙色预警', YELLOW: '黄色预警', GREEN: '正常' }[r] || r)
 const tagType = (r) => ({ RED: 'danger', ORANGE: 'warning', YELLOW: 'warning', GREEN: 'success' }[r] || 'info')
-const desc = (r) => ({ RED: 'GPA < 1.5', ORANGE: '1.5 ≤ GPA < 2.0', YELLOW: '2.0 ≤ GPA ≤ 2.5', GREEN: 'GPA > 2.5' }[r] || '-')
+const desc = (r) => ({ RED: 'GPA < 1.5', ORANGE: '1.5 ≤ GPA < 2.0', YELLOW: '2.0 ≤ GPA < 2.5', GREEN: 'GPA ≥ 2.5' }[r] || '-')
 const color = (r) => ({ RED: '#f56c6c', ORANGE: '#e6a23c', YELLOW: '#f2c94c', GREEN: '#67c23a' }[r] || '#909399')
+
+const ensureEcharts = async () => {
+  if (echartsLib) return echartsLib
+  if (window.echarts) {
+    echartsLib = window.echarts
+    return echartsLib
+  }
+  await new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js'
+    script.onload = resolve
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+  echartsLib = window.echarts
+  return echartsLib
+}
 
 const renderCharts = async () => {
   await nextTick()
+  const echarts = await ensureEcharts()
   if (riskChartRef.value) {
     riskChart ??= echarts.init(riskChartRef.value)
     riskChart.setOption({
@@ -98,7 +116,11 @@ onMounted(async () => {
   const res = await request.get('/admin/dashboard')
   data.value = res.data || {}
   riskRows.value = data.value.risk || []
-  await renderCharts()
+  try {
+    await renderCharts()
+  } catch (e) {
+    console.error('Echarts load failed:', e)
+  }
   window.addEventListener('resize', resizeCharts)
 })
 

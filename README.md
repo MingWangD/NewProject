@@ -16,8 +16,10 @@
 ## 3. 风险预警规则（按 GPA 颜色）
 - 红色预警：GPA < 1.5
 - 橙色预警：1.5 ≤ GPA < 2.0
-- 黄色预警：2.0 ≤ GPA ≤ 2.5
-- 正常：GPA > 2.5
+- 黄色预警：2.0 ≤ GPA < 2.5
+- 正常：GPA ≥ 2.5
+
+> `student_gpa.risk_level` 已改为 `VARCHAR(20)`，统一保存 `RED / ORANGE / YELLOW / GREEN`，不再使用 `HIGH / MEDIUM / LOW`。
 
 ## 4. GPA 计分说明（已改为百分制换算）
 - 学生提交考试后先得到该场考试原始分（按所选题目分值累加）。
@@ -33,6 +35,10 @@
 ### 数据库
 1. 创建 MySQL 数据库并执行：`springboot/src/main/resources/sql/schema.sql`
 2. 脚本已初始化：管理员、多个学生、固定课程、每门课程20题（共100题）、以及“部分出勤达标/不达标”的登录记录。
+3. 如果你是从旧版本升级（`risk_level` 仍是 ENUM 或旧值），请额外执行：
+   `springboot/src/main/resources/sql/migrations/20260327_alter_student_gpa_risk_level.sql`
+4. 如果你的题库历史数据出现重复（例如同题带“第N题”后缀），请执行：
+   `springboot/src/main/resources/sql/migrations/20260327_deduplicate_question_bank.sql`
 
 ### 后端
 ```bash
