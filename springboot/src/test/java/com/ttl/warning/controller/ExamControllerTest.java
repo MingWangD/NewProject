@@ -48,6 +48,7 @@ class ExamControllerTest {
         when(examService.submit(any())).thenReturn(Map.of("score", 95));
         when(examRecordMapper.findScoresByExam(1L)).thenReturn(List.of(Map.of("studentId", 2, "score", 95)));
         when(examRecordMapper.findAnswerDetails(9L)).thenReturn(List.of(Map.of("questionId", 11, "selectedOption", "A")));
+        when(examRecordMapper.findRecordMeta(9L)).thenReturn(Map.of("recordId", 9, "examName", "期中考试", "studentName", "张三"));
 
         mockMvc.perform(post("/api/exam/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,5 +91,10 @@ class ExamControllerTest {
         mockMvc.perform(get("/api/exam/record/9/answers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
+
+        mockMvc.perform(get("/api/exam/record/9/meta"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.data.studentName").value("张三"));
     }
 }

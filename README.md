@@ -37,6 +37,8 @@
 2. 脚本已初始化：管理员、多个学生、固定课程、每门课程20题（共100题）、以及“部分出勤达标/不达标”的登录记录。
 3. 如果你是从旧版本升级（`risk_level` 仍是 ENUM 或旧值），请额外执行：
    `springboot/src/main/resources/sql/migrations/20260327_alter_student_gpa_risk_level.sql`
+4. 如果你的题库历史数据出现重复（例如同题带“第N题”后缀），请执行：
+   `springboot/src/main/resources/sql/migrations/20260327_deduplicate_question_bank.sql`
 
 ### 后端
 ```bash

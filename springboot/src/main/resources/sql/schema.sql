@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS question_bank (
   score INT NOT NULL DEFAULT 5,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_question_subject(subject_id),
+  UNIQUE KEY uk_question_subject_content(subject_id, content(191)),
   CONSTRAINT fk_question_subject FOREIGN KEY(subject_id) REFERENCES subjects(id)
 ) ENGINE=InnoDB;
 
