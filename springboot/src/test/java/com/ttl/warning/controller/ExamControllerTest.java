@@ -47,6 +47,7 @@ class ExamControllerTest {
         when(examService.canAttendDetail(1L, 2L)).thenReturn(Map.of("canAttend", true));
         when(examService.submit(any())).thenReturn(Map.of("score", 95));
         when(examRecordMapper.findScoresByExam(1L)).thenReturn(List.of(Map.of("studentId", 2, "score", 95)));
+        when(examRecordMapper.findByExamAndStudent(1L, 2L)).thenReturn(Map.of("id", 99, "score", 95));
         when(examRecordMapper.findAnswerDetails(9L)).thenReturn(List.of(Map.of("questionId", 11, "selectedOption", "A")));
         when(examRecordMapper.findRecordMeta(9L)).thenReturn(Map.of("recordId", 9, "examName", "期中考试", "studentName", "张三"));
 
@@ -87,6 +88,11 @@ class ExamControllerTest {
         mockMvc.perform(get("/api/exam/1/scores"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
+
+        mockMvc.perform(get("/api/exam/1/record/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.data.id").value(99));
 
         mockMvc.perform(get("/api/exam/record/9/answers"))
                 .andExpect(status().isOk())

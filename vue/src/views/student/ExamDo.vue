@@ -24,6 +24,9 @@ onMounted(async()=> qs.value=(await request.get(`/exam/${route.params.examId}/qu
 const submit = async()=>{
   const answers = qs.value.map(q=>({questionId:q.id,selectedOption:ans[q.id]||'A'}))
   const res = await request.post('/exam/submit',{examId:Number(route.params.examId), studentId:user.id, answers})
-  if(res.code==='200'){alert(`成绩:${res.data.score}`);router.push('/student/score')} else alert(res.message)
+  if(res.code==='200'){
+    alert(`成绩:${res.data.score}`)
+    router.push(`/student/result/${res.data.recordId}`)
+  } else alert(res.message)
 }
 </script>

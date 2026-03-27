@@ -59,6 +59,11 @@ public class ExamController {
         return ApiResponse.ok(examRecordMapper.findScoresByExam(examId));
     }
 
+    @GetMapping("/{examId}/record/{studentId}")
+    public ApiResponse<?> studentRecord(@PathVariable Long examId, @PathVariable Long studentId) {
+        return ApiResponse.ok(examRecordMapper.findByExamAndStudent(examId, studentId));
+    }
+
     @GetMapping("/record/{recordId}/answers")
     public ApiResponse<?> answers(@PathVariable Long recordId) {
         return ApiResponse.ok(examRecordMapper.findAnswerDetails(recordId));

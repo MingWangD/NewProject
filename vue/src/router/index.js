@@ -20,6 +20,7 @@ const routes = [
     children: [
       { path: 'exams', component: () => import('@/views/student/ExamList.vue') },
       { path: 'exam/:examId', component: () => import('@/views/student/ExamDo.vue') },
+      { path: 'result/:recordId', component: () => import('@/views/student/ExamResult.vue') },
       { path: 'score', component: () => import('@/views/student/ScoreView.vue') },
       { path: 'state', component: () => import('@/views/student/LearnState.vue') }
     ]
