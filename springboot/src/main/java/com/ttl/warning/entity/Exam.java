@@ -8,7 +8,6 @@ public class Exam {
     private Long subjectId;
     private Integer totalScore;
     private Integer passScore;
-    private Integer courseHours;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     public Long getId() { return id; }
@@ -21,8 +20,6 @@ public class Exam {
     public void setTotalScore(Integer totalScore) { this.totalScore = totalScore; }
     public Integer getPassScore() { return passScore; }
     public void setPassScore(Integer passScore) { this.passScore = passScore; }
-    public Integer getCourseHours() { return courseHours; }
-    public void setCourseHours(Integer courseHours) { this.courseHours = courseHours; }
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }

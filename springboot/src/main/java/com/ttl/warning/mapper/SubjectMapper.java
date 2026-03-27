@@ -10,4 +10,7 @@ import java.util.List;
 public interface SubjectMapper {
     @Select("select * from subjects order by id")
     List<Subject> findAll();
+
+    @Select("select * from subjects where id=#{id}")
+    Subject findById(Long id);
 }

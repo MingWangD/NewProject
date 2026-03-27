@@ -6,7 +6,6 @@ public class User {
     private String password;
     private String realName;
     private String role;
-    private Integer totalHours;
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getUsername() { return username; }
@@ -17,6 +16,4 @@ public class User {
     public void setRealName(String realName) { this.realName = realName; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
-    public Integer getTotalHours() { return totalHours; }
-    public void setTotalHours(Integer totalHours) { this.totalHours = totalHours; }
 }

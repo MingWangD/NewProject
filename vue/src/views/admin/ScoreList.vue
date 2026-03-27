@@ -1,13 +1,16 @@
 <template>
   <el-card>
-    <el-select v-model="examId" placeholder="选择考试" @change="loadScores">
-      <el-option v-for="e in exams" :key="e.id" :value="e.id" :label="e.name"/>
+    <template #header><b>学生成绩列表</b></template>
+    <el-select v-model="examId" placeholder="选择考试" @change="loadScores" style="width: 300px">
+      <el-option v-for="e in exams" :key="e.id" :value="e.id" :label="`${e.name} - ${e.subjectName}`"/>
     </el-select>
-    <el-table :data="scores" style="margin-top:10px">
+    <el-table :data="scores" border style="margin-top:10px">
       <el-table-column prop="studentName" label="学生"/>
       <el-table-column prop="score" label="成绩"/>
-      <el-table-column prop="isPassed" label="通过">
-        <template #default="scope">{{ scope.row.isPassed ? '是' : '否' }}</template>
+      <el-table-column prop="isPassed" label="是否通过">
+        <template #default="scope">
+          <el-tag :type="scope.row.isPassed===1 ? 'success' : 'danger'">{{ scope.row.isPassed===1 ? '通过' : '未通过' }}</el-tag>
+        </template>
       </el-table-column>
       <el-table-column label="操作">
         <template #default="scope"><el-button @click="go(scope.row.id)">答题详情</el-button></template>

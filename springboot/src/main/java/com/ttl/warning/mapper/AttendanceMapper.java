@@ -14,7 +14,7 @@ public interface AttendanceMapper {
     @Select("select count(*) from login_attendance where student_id=#{studentId}")
     int countByStudent(Long studentId);
 
-    @Select("select student_id as studentId, count(*) as attendanceCount from login_attendance group by student_id")
+    @Select("select u.id as studentId, u.real_name as studentName, count(a.id) as attendanceCount from users u left join login_attendance a on u.id=a.student_id where u.role='STUDENT' group by u.id, u.real_name order by u.id")
     List<Map<String, Object>> countAll();
 
     @Select("select count(*) from login_attendance")

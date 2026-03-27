@@ -8,9 +8,6 @@ import com.ttl.warning.mapper.ExamRecordMapper;
 import com.ttl.warning.service.ExamService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/exam")
 public class ExamController {
@@ -26,7 +23,11 @@ public class ExamController {
 
     @PostMapping("/create")
     public ApiResponse<?> create(@RequestBody CreateExamRequest request) {
-        return ApiResponse.ok(examService.createExam(request));
+        try {
+            return ApiResponse.ok(examService.createExam(request));
+        } catch (Exception e) {
+            return ApiResponse.fail(e.getMessage());
+        }
     }
 
     @GetMapping("/list")
@@ -41,10 +42,7 @@ public class ExamController {
 
     @GetMapping("/{examId}/can-attend/{studentId}")
     public ApiResponse<?> canAttend(@PathVariable Long examId, @PathVariable Long studentId) {
-        boolean pass = examService.canAttend(examId, studentId);
-        Map<String, Object> map = new HashMap<>();
-        map.put("canAttend", pass);
-        return ApiResponse.ok(map);
+        return ApiResponse.ok(examService.canAttendDetail(examId, studentId));
     }
 
     @PostMapping("/submit")

@@ -1,14 +1,12 @@
 <template>
-  <div style="width:320px;margin:120px auto">
+  <div style="max-width:360px;margin:120px auto">
     <el-card>
-      <el-form :model="form">
-        <el-form-item><el-input v-model="form.username" placeholder="账号"/></el-form-item>
-        <el-form-item><el-input type="password" v-model="form.password" placeholder="密码"/></el-form-item>
-        <el-form-item>
-          <el-select v-model="form.role" style="width:100%">
-            <el-option label="管理员" value="ADMIN"/>
-            <el-option label="学生" value="STUDENT"/>
-          </el-select>
+      <template #header><b>学情智能预警系统</b></template>
+      <el-form :model="form" label-position="top">
+        <el-form-item label="账号"><el-input v-model="form.username" placeholder="admin / stu1"/></el-form-item>
+        <el-form-item label="密码"><el-input type="password" v-model="form.password" placeholder="123456"/></el-form-item>
+        <el-form-item label="角色">
+          <el-segmented v-model="form.role" :options="['STUDENT','ADMIN']"/>
         </el-form-item>
         <el-button type="primary" style="width:100%" @click="login">登录</el-button>
       </el-form>
@@ -21,7 +19,7 @@ import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
-const form = reactive({ username: '', password: '', role: 'STUDENT' })
+const form = reactive({ username: 'stu1', password: '123456', role: 'STUDENT' })
 
 const login = async () => {
   const res = await request.post('/auth/login', form)

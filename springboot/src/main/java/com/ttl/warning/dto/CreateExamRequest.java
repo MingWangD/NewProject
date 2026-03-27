@@ -7,7 +7,6 @@ public class CreateExamRequest {
     private String name;
     private Long subjectId;
     private Integer passScore;
-    private Integer courseHours;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private List<Long> questionIds;
@@ -17,8 +16,6 @@ public class CreateExamRequest {
     public void setSubjectId(Long subjectId) { this.subjectId = subjectId; }
     public Integer getPassScore() { return passScore; }
     public void setPassScore(Integer passScore) { this.passScore = passScore; }
-    public Integer getCourseHours() { return courseHours; }
-    public void setCourseHours(Integer courseHours) { this.courseHours = courseHours; }
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }

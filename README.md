@@ -4,15 +4,24 @@
 - 后端：Spring Boot 3 + MyBatis + MySQL 5.7
 - 前端：Vue3 + Vite + Element Plus + ECharts
 
-## 2. 目录结构
+## 2. 固定课程（本学期）
+- 高等数学（4学分，64学时）
+- 数据结构（4学分，48学时）
+- 操作系统（3学分，48学时）
+- 计算机网络（3学分，32学时）
+- Java程序设计（4学分，64学时）
+
+> 业务上改为“在固定课程下发布考试”，不再在创建考试时设置课程学时。
+
+## 3. 目录结构
 - `springboot/`：后端
 - `vue/`：前端
-- `springboot/src/main/resources/sql/schema.sql`：完整建表 SQL
+- `springboot/src/main/resources/sql/schema.sql`：完整建表 SQL + 初始化数据
 
-## 3. 启动说明
+## 4. 启动说明
 ### 数据库
-1. 创建 MySQL 数据库并执行：
-   `springboot/src/main/resources/sql/schema.sql`
+1. 创建 MySQL 数据库并执行：`springboot/src/main/resources/sql/schema.sql`
+2. 脚本已初始化：管理员、多个学生、固定课程、示例题库、以及“部分出勤达标/不达标”的登录记录。
 
 ### 后端
 ```bash
@@ -27,26 +36,26 @@ npm install
 npm run dev
 ```
 
-## 4. 关键接口
+## 5. 关键接口
 ### 认证
 - `POST /api/auth/login`：登录（学生登录自动记1次出勤/天）
 
 ### 公共数据
-- `GET /api/common/subjects`：固定5科目
-- `GET /api/common/questions/{subjectId}`：按科目拉题库
+- `GET /api/common/subjects`：固定课程列表（含学分、学时）
+- `GET /api/common/questions/{subjectId}`：按课程拉题库
 
 ### 考试
-- `POST /api/exam/create`：管理员创建考试（题库勾选组卷）
+- `POST /api/exam/create`：管理员在课程下发布考试（题库勾选组卷）
 - `GET /api/exam/list`：考试列表
 - `GET /api/exam/{examId}/questions`：考试题目
-- `GET /api/exam/{examId}/can-attend/{studentId}`：校验出勤是否可考试
+- `GET /api/exam/{examId}/can-attend/{studentId}`：校验出勤门槛（返回当前出勤、要求出勤）
 - `POST /api/exam/submit`：提交考试并自动判题/算分/GPA刷新
 - `GET /api/exam/{examId}/scores`：管理员查看某场考试成绩
-- `GET /api/exam/record/{recordId}/answers`：查看某条考试答题详情
+- `GET /api/exam/record/{recordId}/answers`：查看答题详情
 
 ### 学生
 - `GET /api/student/{studentId}/state`：学习状态（成绩/GPA/风险/出勤）
 
 ### 管理员
-- `GET /api/admin/attendance`：学生总出勤
+- `GET /api/admin/attendance`：学生出勤统计
 - `GET /api/admin/dashboard`：风险统计、均分、平均GPA、出勤率、通过率

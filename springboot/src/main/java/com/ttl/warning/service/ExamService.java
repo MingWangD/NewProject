@@ -4,10 +4,12 @@ import com.ttl.warning.dto.CreateExamRequest;
 import com.ttl.warning.dto.SubmitExamRequest;
 import com.ttl.warning.entity.Exam;
 import com.ttl.warning.entity.Question;
+import com.ttl.warning.entity.Subject;
 import com.ttl.warning.mapper.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -16,15 +18,18 @@ public class ExamService {
     private final QuestionMapper questionMapper;
     private final ExamRecordMapper examRecordMapper;
     private final AttendanceMapper attendanceMapper;
+    private final SubjectMapper subjectMapper;
     private final GpaService gpaService;
     private final GpaMapper gpaMapper;
 
     public ExamService(ExamMapper examMapper, QuestionMapper questionMapper, ExamRecordMapper examRecordMapper,
-                       AttendanceMapper attendanceMapper, GpaService gpaService, GpaMapper gpaMapper) {
+                       AttendanceMapper attendanceMapper, SubjectMapper subjectMapper,
+                       GpaService gpaService, GpaMapper gpaMapper) {
         this.examMapper = examMapper;
         this.questionMapper = questionMapper;
         this.examRecordMapper = examRecordMapper;
         this.attendanceMapper = attendanceMapper;
+        this.subjectMapper = subjectMapper;
         this.gpaService = gpaService;
         this.gpaMapper = gpaMapper;
     }
@@ -34,13 +39,15 @@ public class ExamService {
         int totalScore = 0;
         for (Long qid : req.getQuestionIds()) {
             Question q = questionMapper.findById(qid);
+            if (q == null || !q.getSubjectId().equals(req.getSubjectId())) {
+                throw new RuntimeException("题目必须属于已选课程");
+            }
             totalScore += q.getScore();
         }
         Exam exam = new Exam();
         exam.setName(req.getName());
         exam.setSubjectId(req.getSubjectId());
         exam.setPassScore(req.getPassScore());
-        exam.setCourseHours(req.getCourseHours());
         exam.setStartTime(req.getStartTime());
         exam.setEndTime(req.getEndTime());
         exam.setTotalScore(totalScore);
@@ -51,10 +58,21 @@ public class ExamService {
         return exam.getId();
     }
 
-    public boolean canAttend(Long examId, Long studentId) {
+    public Map<String, Object> canAttendDetail(Long examId, Long studentId) {
         Exam exam = examMapper.findById(examId);
+        Subject subject = subjectMapper.findById(exam.getSubjectId());
         int attendance = attendanceMapper.countByStudent(studentId);
-        return attendance >= Math.ceil(exam.getCourseHours() * 2.0 / 3.0);
+        int required = (int) Math.ceil(subject.getTotalHours() * 2.0 / 3.0);
+        Map<String, Object> result = new HashMap<>();
+        result.put("canAttend", attendance >= required);
+        result.put("attendance", attendance);
+        result.put("requiredAttendance", required);
+        result.put("subjectHours", subject.getTotalHours());
+        return result;
+    }
+
+    public boolean canAttend(Long examId, Long studentId) {
+        return (boolean) canAttendDetail(examId, studentId).get("canAttend");
     }
 
     @Transactional
@@ -63,6 +81,13 @@ public class ExamService {
             throw new RuntimeException("出勤不达标，禁止参加考试");
         }
         Exam exam = examMapper.findById(req.getExamId());
+        if (LocalDateTime.now().isBefore(exam.getStartTime()) || LocalDateTime.now().isAfter(exam.getEndTime())) {
+            throw new RuntimeException("当前不在考试开放时间内");
+        }
+        if (examRecordMapper.countByExamAndStudent(req.getExamId(), req.getStudentId()) > 0) {
+            throw new RuntimeException("该考试仅允许提交一次");
+        }
+
         int score = 0;
         Map<Long, Question> questionMap = new HashMap<>();
         for (Map<String, Object> item : examMapper.findQuestionsByExam(req.getExamId())) {

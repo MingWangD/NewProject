@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Mapper
 public interface ExamMapper {
-    @Insert("insert into exams(name, subject_id, total_score, pass_score, course_hours, start_time, end_time) values(#{name},#{subjectId},#{totalScore},#{passScore},#{courseHours},#{startTime},#{endTime})")
+    @Insert("insert into exams(name, subject_id, total_score, pass_score, start_time, end_time) values(#{name},#{subjectId},#{totalScore},#{passScore},#{startTime},#{endTime})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Exam exam);
 
