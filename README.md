@@ -2,7 +2,7 @@
 
 ## 1. 技术栈
 - 后端：Spring Boot 3 + MyBatis + MySQL 5.7
-- 前端：Vue3 + Vite + Element Plus + ECharts
+- 前端：Vue3 + Vite + Element Plus
 
 ## 2. 固定课程（本学期）
 - 高等数学（4学分，64学时）
@@ -13,15 +13,21 @@
 
 > 业务上改为“在固定课程下发布考试”，不再在创建考试时设置课程学时。
 
-## 3. 目录结构
+## 3. 风险预警规则（按 GPA 颜色）
+- 红色预警：GPA < 1.5
+- 橙色预警：1.5 ≤ GPA < 2.0
+- 黄色预警：2.0 ≤ GPA ≤ 2.5
+- 正常：GPA > 2.5
+
+## 4. 目录结构
 - `springboot/`：后端
 - `vue/`：前端
 - `springboot/src/main/resources/sql/schema.sql`：完整建表 SQL + 初始化数据
 
-## 4. 启动说明
+## 5. 启动说明
 ### 数据库
 1. 创建 MySQL 数据库并执行：`springboot/src/main/resources/sql/schema.sql`
-2. 脚本已初始化：管理员、多个学生、固定课程、示例题库、以及“部分出勤达标/不达标”的登录记录。
+2. 脚本已初始化：管理员、多个学生、固定课程、每门课程20题（共100题）、以及“部分出勤达标/不达标”的登录记录。
 
 ### 后端
 ```bash
@@ -36,7 +42,7 @@ npm install
 npm run dev
 ```
 
-## 5. 关键接口
+## 6. 关键接口
 ### 认证
 - `POST /api/auth/login`：登录（学生登录自动记1次出勤/天）
 

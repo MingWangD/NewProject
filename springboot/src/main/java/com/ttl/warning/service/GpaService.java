@@ -44,7 +44,7 @@ public class GpaService {
                 x.setTotalCredits(0);
                 x.setTotalGradePoint(0.0);
                 x.setGpa(0.0);
-                x.setRiskLevel("HIGH");
+                x.setRiskLevel("RED");
                 return x;
             });
             gpa.setTotalCredits(gpa.getTotalCredits() + credit);
@@ -55,9 +55,16 @@ public class GpaService {
             double value = gpa.getTotalCredits() == 0 ? 0 : gpa.getTotalGradePoint() / gpa.getTotalCredits();
             value = Math.round(value * 10.0) / 10.0;
             gpa.setGpa(value);
-            gpa.setRiskLevel(value < 2.0 ? "HIGH" : (value <= 3.0 ? "MEDIUM" : "LOW"));
+            gpa.setRiskLevel(gpaColor(value));
             gpaMapper.upsert(gpa);
         }
+    }
+
+    private String gpaColor(double gpa) {
+        if (gpa < 1.5) return "RED";
+        if (gpa < 2.0) return "ORANGE";
+        if (gpa <= 2.5) return "YELLOW";
+        return "GREEN";
     }
 
     public double scoreToPoint(Integer score) {
