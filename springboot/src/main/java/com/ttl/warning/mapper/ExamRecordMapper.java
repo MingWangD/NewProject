@@ -18,6 +18,9 @@ public interface ExamRecordMapper {
     @Select("select count(*) from student_exam_record where exam_id=#{examId} and student_id=#{studentId}")
     int countByExamAndStudent(@Param("examId") Long examId, @Param("studentId") Long studentId);
 
+    @Select("select count(*) from student_exam_record where exam_id=#{examId}")
+    int countByExam(Long examId);
+
     @Select("select r.id, r.score, r.is_passed as isPassed, r.submit_time, u.real_name as studentName from student_exam_record r join users u on r.student_id=u.id where r.exam_id=#{examId} order by r.submit_time desc")
     List<Map<String, Object>> findScoresByExam(Long examId);
 
@@ -45,10 +48,27 @@ public interface ExamRecordMapper {
             "from student_exam_record r join exams e on r.exam_id=e.id group by e.subject_id, r.student_id")
     List<Map<String, Object>> bestScoresBySubjectAndStudent();
 
-    @Select("select r.id, r.exam_id as examId, e.name as examName, r.score, r.is_passed as isPassed, r.submit_time as submitTime from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId} order by r.submit_time desc")
+    @Select("select r.id, r.exam_id as examId, e.name as examName, e.exam_type as examType, r.score, r.is_passed as isPassed, r.submit_time as submitTime from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId} order by r.submit_time desc")
     List<Map<String, Object>> findByStudent(Long studentId);
 
     @Select("select r.id, r.exam_id as examId, r.student_id as studentId, r.score, r.is_passed as isPassed, r.submit_time as submitTime " +
             "from student_exam_record r where r.exam_id=#{examId} and r.student_id=#{studentId} limit 1")
     Map<String, Object> findByExamAndStudent(@Param("examId") Long examId, @Param("studentId") Long studentId);
+
+
+    @Select("select r.student_id as studentId, e.subject_id as subjectId, e.exam_type as examType, " +
+            "(r.score * 100.0) / nullif(e.total_score,0) as percentScore, r.is_passed as isPassed " +
+            "from student_exam_record r join exams e on r.exam_id=e.id")
+    List<Map<String, Object>> findAllForRiskModel();
+
+
+    @Select("select e.subject_id as subjectId, e.exam_type as examType, (r.score * 100.0) / nullif(e.total_score,0) as percentScore, r.score as rawScore " +
+            "from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId}")
+    List<Map<String, Object>> findRiskRowsByStudent(Long studentId);
+
+    @Select("select r.id as recordId, e.name as examName, r.score, r.is_passed as isPassed, r.submit_time as submitTime " +
+            "from student_exam_record r join exams e on r.exam_id=e.id " +
+            "where r.student_id=#{studentId} and e.subject_id=#{subjectId} and e.exam_type='REGULAR' order by r.submit_time desc")
+    List<Map<String, Object>> findRegularRecordsByStudentAndSubject(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
+
 }
