@@ -48,7 +48,7 @@
 
     <el-card>
       <template #header><b>已发布考试（可撤销未被任何学生完成的考试）</b></template>
-      <el-table :data="examList" border>
+      <el-table :data="pagedExamList" border>
         <el-table-column prop="id" label="ID" width="80"/>
         <el-table-column prop="name" label="考试名称"/>
         <el-table-column prop="subjectName" label="课程" width="140"/>
@@ -63,6 +63,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        style="margin-top: 12px"
+        background
+        layout="prev, pager, next, ->, total"
+        :current-page="examPage"
+        :page-size="examPageSize"
+        :total="examList.length"
+        @current-change="(p)=>examPage=p"
+      />
     </el-card>
   </el-space>
 </template>
@@ -78,14 +87,18 @@ const examList = ref([])
 const tableRef = ref()
 const page = ref(1)
 const pageSize = 8
+const examPage = ref(1)
+const examPageSize = 8
 const selectedIdSet = ref(new Set())
 const form = reactive({ name: '', subjectId: null, examType: 'REGULAR', passScore: 60, startTime: '', endTime: '', questionIds: [] })
 const pagedQuestions = computed(() => questions.value.slice((page.value - 1) * pageSize, page.value * pageSize))
+const pagedExamList = computed(() => examList.value.slice((examPage.value - 1) * examPageSize, examPage.value * examPageSize))
 
 const loadSubjects = async () => subjects.value = (await request.get('/common/subjects')).data
 const loadExamList = async () => {
   const list = (await request.get('/exam/list')).data || []
   examList.value = list.map(i => ({ ...i, subjectName: i.subject_name || i.subjectName, examType: i.examType || i.exam_type }))
+  examPage.value = 1
 }
 
 const onSubjectChange = async () => {

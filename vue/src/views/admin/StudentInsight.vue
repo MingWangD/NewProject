@@ -20,7 +20,7 @@
 
     <el-card style="margin-top:12px">
       <template #header><b>课后测验成绩（可查看答题详情）</b></template>
-      <el-table :data="detail.regularRecords || []" border>
+      <el-table :data="pagedRecords" border>
         <el-table-column prop="examName" label="考试名称"/>
         <el-table-column prop="score" label="分数" width="100"/>
         <el-table-column prop="isPassed" label="通过" width="100">
@@ -33,6 +33,15 @@
           <template #default="scope"><el-button @click="goAnswer(scope.row.recordId)">题目详情</el-button></template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        style="margin-top:12px"
+        background
+        layout="prev, pager, next, ->, total"
+        :current-page="recordPage"
+        :page-size="recordPageSize"
+        :total="regularRecords.length"
+        @current-change="(p)=>recordPage=p"
+      />
     </el-card>
   </el-card>
 </template>
@@ -47,6 +56,8 @@ const subjects = ref([])
 const studentId = ref(null)
 const subjectId = ref(null)
 const detail = ref({})
+const recordPage = ref(1)
+const recordPageSize = 8
 
 const subjectStatus = computed(() => {
   const status = detail.value.subjectGpa?.status
@@ -61,6 +72,9 @@ const subjectGpaText = computed(() => {
   return detail.value.subjectGpa?.subjectGpa ?? '-'
 })
 
+const regularRecords = computed(() => detail.value.regularRecords || [])
+const pagedRecords = computed(() => regularRecords.value.slice((recordPage.value - 1) * recordPageSize, recordPage.value * recordPageSize))
+
 const loadBase = async () => {
   students.value = (await request.get('/admin/students')).data || []
   subjects.value = (await request.get('/common/subjects')).data || []
@@ -72,6 +86,7 @@ const loadBase = async () => {
 const load = async () => {
   if (!studentId.value || !subjectId.value) return
   detail.value = (await request.get('/admin/student-course-query', { params: { studentId: studentId.value, subjectId: subjectId.value } })).data || {}
+  recordPage.value = 1
 }
 
 const goAnswer = (recordId) => router.push(`/admin/answers/${recordId}`)

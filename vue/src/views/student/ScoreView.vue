@@ -7,9 +7,9 @@
         <el-table :data="group.items" border>
           <el-table-column prop="examName" label="考试名称"/>
           <el-table-column prop="score" label="成绩" width="100"/>
-          <el-table-column prop="isPassed" label="通过" width="100">
-            <template #default="scope">
-              <el-tag :type="scope.row.isPassed===1 ? 'success':'danger'">{{ scope.row.isPassed===1 ? '通过' : '未通过' }}</el-tag>
+          <el-table-column label="完成状态" width="120">
+            <template #default>
+              <el-tag type="success">已完成</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="submitTime" label="提交时间"/>

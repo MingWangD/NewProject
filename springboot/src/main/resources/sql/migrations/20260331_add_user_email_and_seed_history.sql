@@ -46,6 +46,34 @@ UPDATE student_exam_record SET score = GREATEST(20, score - 14) WHERE student_id
 UPDATE student_exam_record SET score = GREATEST(20, score - 24) WHERE student_id IN (6, 7);
 
 
+-- 按最新分数重算通过状态，避免出现“100分但未通过”
+UPDATE student_exam_record
+SET is_passed = CASE WHEN score >= 60 THEN 1 ELSE 0 END
+WHERE exam_id BETWEEN 3001 AND 3035;
+
+-- 为历史样本补充最小化答题明细（可查看每题选择与正确答案）
+INSERT IGNORE INTO exam_question(exam_id, question_id)
+SELECT e.id AS exam_id, MIN(q.id) AS question_id
+FROM exams e
+JOIN question_bank q ON q.subject_id=e.subject_id
+WHERE e.id BETWEEN 3001 AND 3035
+GROUP BY e.id;
+
+INSERT IGNORE INTO student_answer_record(exam_record_id, question_id, selected_option, is_correct)
+SELECT r.id AS exam_record_id,
+       eq.question_id,
+       CASE
+         WHEN r.is_passed = 1 THEN q.correct_option
+         WHEN q.correct_option = 'A' THEN 'B'
+         ELSE 'A'
+       END AS selected_option,
+       CASE WHEN r.is_passed = 1 THEN 1 ELSE 0 END AS is_correct
+FROM student_exam_record r
+JOIN exam_question eq ON eq.exam_id=r.exam_id
+JOIN question_bank q ON q.id=eq.question_id
+WHERE r.exam_id BETWEEN 3001 AND 3035;
+
+
 INSERT IGNORE INTO login_attendance(student_id, login_date)
 SELECT u.id, DATE_ADD('2026-03-01', INTERVAL d.seq DAY)
 FROM users u
