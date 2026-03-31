@@ -31,6 +31,9 @@ public class GpaService {
 
     public void recalculateAllStudents() {
         List<Map<String, Object>> rows = examRecordMapper.findAllForRiskModel();
+        if (rows == null || rows.isEmpty()) {
+            return;
+        }
         List<Subject> subjects = subjectMapper.findAll();
         Map<Long, Integer> creditMap = new HashMap<>();
         int maxHours = 0;
@@ -69,6 +72,9 @@ public class GpaService {
         for (User student : userMapper.findStudents()) {
             Long studentId = student.getId();
             Map<Long, SubjectScores> subjectScores = byStudentSubject.getOrDefault(studentId, Collections.emptyMap());
+            if (subjectScores.isEmpty()) {
+                continue;
+            }
             int totalCredits = 0;
             double totalGradePoint = 0;
 
@@ -79,7 +85,7 @@ public class GpaService {
                 Double weightedPercent = ss.weightedPercent();
                 Double finalAvgBySubject = ss.finalAvg();
                 if (weightedPercent == null) continue;
-                if (finalAvgBySubject == null || finalAvgBySubject < 60) continue;
+                if (finalAvgBySubject != null && finalAvgBySubject < 60) continue;
                 double point = scoreToPoint((int) Math.round(weightedPercent));
                 totalCredits += credit;
                 totalGradePoint += point * credit;
