@@ -36,6 +36,9 @@ public class ExamService {
 
     @Transactional
     public Long createExam(CreateExamRequest req) {
+        if (req == null || req.getQuestionIds() == null || req.getQuestionIds().isEmpty()) {
+            throw new RuntimeException("题目列表不能为空");
+        }
         int totalScore = 0;
         for (Long qid : req.getQuestionIds()) {
             Question q = questionMapper.findById(qid);
@@ -61,7 +64,13 @@ public class ExamService {
 
     public Map<String, Object> canAttendDetail(Long examId, Long studentId) {
         Exam exam = examMapper.findById(examId);
+        if (exam == null) {
+            throw new RuntimeException("考试不存在");
+        }
         Subject subject = subjectMapper.findById(exam.getSubjectId());
+        if (subject == null) {
+            throw new RuntimeException("考试所属课程不存在");
+        }
         int attendance = attendanceMapper.countByStudent(studentId);
         boolean isFinal = "FINAL".equalsIgnoreCase(exam.getExamType());
         int required = isFinal ? (int) Math.ceil(subject.getTotalHours() * 2.0 / 3.0) : 0;
@@ -80,10 +89,19 @@ public class ExamService {
 
     @Transactional
     public Map<String, Object> submit(SubmitExamRequest req) {
+        if (req == null || req.getExamId() == null || req.getStudentId() == null) {
+            throw new RuntimeException("提交参数不完整");
+        }
+        if (req.getAnswers() == null) {
+            throw new RuntimeException("答题内容不能为空");
+        }
         if (!canAttend(req.getExamId(), req.getStudentId())) {
             throw new RuntimeException("出勤不达标，禁止参加考试");
         }
         Exam exam = examMapper.findById(req.getExamId());
+        if (exam == null) {
+            throw new RuntimeException("考试不存在");
+        }
         if (LocalDateTime.now().isBefore(exam.getStartTime()) || LocalDateTime.now().isAfter(exam.getEndTime())) {
             throw new RuntimeException("当前不在考试开放时间内");
         }
@@ -102,8 +120,14 @@ public class ExamService {
         }
 
         for (SubmitExamRequest.AnswerItem ans : req.getAnswers()) {
+            if (ans == null || ans.getQuestionId() == null || ans.getSelectedOption() == null) {
+                throw new RuntimeException("答题内容不完整");
+            }
             Question q = questionMap.get(ans.getQuestionId());
-            if (q != null && q.getCorrectOption() != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption())) {
+            if (q == null) {
+                throw new RuntimeException("存在不属于该考试的题目");
+            }
+            if (q.getCorrectOption() != null && q.getCorrectOption().equalsIgnoreCase(ans.getSelectedOption())) {
                 score += q.getScore();
             }
         }
