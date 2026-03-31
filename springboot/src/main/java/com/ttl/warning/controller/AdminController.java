@@ -6,6 +6,7 @@ import com.ttl.warning.mapper.ExamRecordMapper;
 import com.ttl.warning.mapper.GpaMapper;
 import com.ttl.warning.mapper.SubjectMapper;
 import com.ttl.warning.mapper.UserMapper;
+import com.ttl.warning.service.GpaService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +23,16 @@ public class AdminController {
     private final SubjectMapper subjectMapper;
     private final GpaMapper gpaMapper;
     private final ExamRecordMapper examRecordMapper;
+    private final GpaService gpaService;
 
     public AdminController(AttendanceMapper attendanceMapper, UserMapper userMapper, SubjectMapper subjectMapper,
-                           GpaMapper gpaMapper, ExamRecordMapper examRecordMapper) {
+                           GpaMapper gpaMapper, ExamRecordMapper examRecordMapper, GpaService gpaService) {
         this.attendanceMapper = attendanceMapper;
         this.userMapper = userMapper;
         this.subjectMapper = subjectMapper;
         this.gpaMapper = gpaMapper;
         this.examRecordMapper = examRecordMapper;
+        this.gpaService = gpaService;
     }
 
     @GetMapping("/attendance")
@@ -39,6 +42,7 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public ApiResponse<?> dashboard() {
+        gpaService.recalculateAllStudents();
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> risk = gpaMapper.riskStats();
         map.put("risk", risk);
