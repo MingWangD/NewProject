@@ -15,6 +15,9 @@ public interface UserMapper {
     @Select("select * from users where id=#{id}")
     User findById(Long id);
 
+    @Select("select * from users where id=#{id} and role='STUDENT'")
+    User findStudentById(Long id);
+
     @Select("select * from users where role='STUDENT'")
     List<User> findStudents();
 

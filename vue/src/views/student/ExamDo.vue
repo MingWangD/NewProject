@@ -18,15 +18,21 @@
 import { onMounted, ref, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import request from '@/utils/request';
+import { ElMessage } from 'element-plus';
 const route = useRoute(); const router = useRouter(); const user = JSON.parse(localStorage.getItem('user')||'{}')
 const qs = ref([]); const ans = reactive({})
 onMounted(async()=> qs.value=(await request.get(`/exam/${route.params.examId}/questions`)).data)
 const submit = async()=>{
-  const answers = qs.value.map(q=>({questionId:q.id,selectedOption:ans[q.id]||'A'}))
+  const unanswered = qs.value.filter(q => !ans[q.id]).length
+  if (unanswered > 0) {
+    ElMessage.warning(`还有 ${unanswered} 道题未作答，请完成后再提交`)
+    return
+  }
+  const answers = qs.value.map(q=>({questionId:q.id,selectedOption:ans[q.id]}))
   const res = await request.post('/exam/submit',{examId:Number(route.params.examId), studentId:user.id, answers})
   if(res.code==='200'){
-    alert(`成绩:${res.data.score}`)
+    ElMessage.success(`提交成功，成绩：${res.data.score}`)
     router.push(`/student/result/${res.data.recordId}`)
-  } else alert(res.message)
+  } else ElMessage.error(res.message)
 }
 </script>
