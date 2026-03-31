@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -100,5 +101,21 @@ class StudentControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of("username", "stu001", "realName", "张三", "email", "a@b.com"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
+
+        verify(studentService).pendingExamSummary(2L);
+        verify(studentService).subjectGpaDetails(2L);
+    }
+
+    @Test
+    void profileShouldReturnFailWhenUserIsNotStudent() throws Exception {
+        User admin = new User();
+        admin.setId(1L);
+        admin.setRole("ADMIN");
+        when(userMapper.findById(1L)).thenReturn(admin);
+
+        mockMvc.perform(get("/api/student/1/profile"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("500"))
+                .andExpect(jsonPath("$.message").value("学生不存在"));
     }
 }
