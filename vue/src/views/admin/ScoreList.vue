@@ -23,7 +23,10 @@ import { ref, onMounted } from 'vue';
 import request from '@/utils/request';
 import router from '@/router';
 const exams = ref([]); const scores = ref([]); const examId = ref(null)
-const loadExams = async ()=> exams.value = (await request.get('/exam/list')).data
+const loadExams = async ()=> {
+  const list = (await request.get('/exam/list')).data || []
+  exams.value = list.map(e => ({ ...e, subjectName: e.subjectName || e.subject_name }))
+}
 const loadScores = async ()=> scores.value = (await request.get(`/exam/${examId.value}/scores`)).data
 const go = (id)=> router.push(`/admin/answers/${id}`)
 onMounted(loadExams)

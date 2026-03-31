@@ -9,6 +9,7 @@ public class CreateExamRequest {
     private Integer passScore;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String examType;
     private List<Long> questionIds;
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -20,6 +21,8 @@ public class CreateExamRequest {
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public String getExamType() { return examType; }
+    public void setExamType(String examType) { this.examType = examType; }
     public List<Long> getQuestionIds() { return questionIds; }
     public void setQuestionIds(List<Long> questionIds) { this.questionIds = questionIds; }
 }

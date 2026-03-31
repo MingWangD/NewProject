@@ -22,7 +22,9 @@ const routes = [
       { path: 'exam/:examId', component: () => import('@/views/student/ExamDo.vue') },
       { path: 'result/:recordId', component: () => import('@/views/student/ExamResult.vue') },
       { path: 'score', component: () => import('@/views/student/ScoreView.vue') },
-      { path: 'state', component: () => import('@/views/student/LearnState.vue') }
+      { path: 'state', component: () => import('@/views/student/LearnState.vue') },
+      { path: 'profile', component: () => import('@/views/student/Profile.vue') },
+      { path: 'timetable', component: () => import('@/views/student/Timetable.vue') }
     ]
   }
 ]

@@ -17,4 +17,8 @@ public interface UserMapper {
 
     @Select("select * from users where role='STUDENT'")
     List<User> findStudents();
+
+
+    @Update("update users set username=#{username}, real_name=#{realName}, email=#{email} where id=#{id} and role='STUDENT'")
+    int updateStudentProfile(User user);
 }

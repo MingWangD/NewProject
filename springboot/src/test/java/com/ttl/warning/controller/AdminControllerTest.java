@@ -6,6 +6,7 @@ import com.ttl.warning.mapper.ExamRecordMapper;
 import com.ttl.warning.mapper.GpaMapper;
 import com.ttl.warning.mapper.SubjectMapper;
 import com.ttl.warning.mapper.UserMapper;
+import com.ttl.warning.service.GpaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,6 +41,9 @@ class AdminControllerTest {
 
     @MockBean
     private ExamRecordMapper examRecordMapper;
+
+    @MockBean
+    private GpaService gpaService;
 
     @Test
     void adminEndpointsShouldReturnSuccess() throws Exception {
