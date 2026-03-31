@@ -9,6 +9,9 @@
           <el-button @click="changeWeek(1)">下一周</el-button>
         </el-space>
       </div>
+      <div style="margin-top: 8px; color: #909399; font-size: 13px;">
+        本页面展示的是本学期示例课程表（公共课程安排），并非个人化排课结果。
+      </div>
     </template>
 
     <el-table :data="rows" border>

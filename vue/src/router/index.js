@@ -32,7 +32,31 @@ const routes = [
   }
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const isAuthed = !!user?.id
+  const role = user?.role
+  const isAdminRoute = to.path.startsWith('/admin')
+  const isStudentRoute = to.path.startsWith('/student')
+
+  if ((isAdminRoute || isStudentRoute) && !isAuthed) {
+    next('/login')
+    return
+  }
+  if (isAdminRoute && role !== 'ADMIN') {
+    next('/login')
+    return
+  }
+  if (isStudentRoute && role !== 'STUDENT') {
+    next('/login')
+    return
+  }
+  next()
+})
+
+export default router
