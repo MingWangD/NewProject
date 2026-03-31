@@ -20,7 +20,7 @@ SELECT 3000 + (s.id - 1) * 7 + n.seq + 1 AS id,
        60 AS pass_score,
        DATE_ADD('2026-03-03 09:00:00', INTERVAL ((s.id - 1) * 2 + n.seq * 5) DAY) AS start_time,
        DATE_ADD('2026-03-03 11:00:00', INTERVAL ((s.id - 1) * 2 + n.seq * 5) DAY) AS end_time,
-       CASE WHEN n.seq = 6 THEN 'FINAL' ELSE 'REGULAR' END AS exam_type
+       'REGULAR' AS exam_type
 FROM subjects s
 JOIN (
   SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
