@@ -10,6 +10,7 @@ public class Exam {
     private Integer passScore;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String examType;
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -24,4 +25,6 @@ public class Exam {
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public String getExamType() { return examType; }
+    public void setExamType(String examType) { this.examType = examType; }
 }

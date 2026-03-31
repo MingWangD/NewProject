@@ -48,7 +48,7 @@ public interface ExamRecordMapper {
             "from student_exam_record r join exams e on r.exam_id=e.id group by e.subject_id, r.student_id")
     List<Map<String, Object>> bestScoresBySubjectAndStudent();
 
-    @Select("select r.id, r.exam_id as examId, e.name as examName, r.score, r.is_passed as isPassed, r.submit_time as submitTime from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId} order by r.submit_time desc")
+    @Select("select r.id, r.exam_id as examId, e.name as examName, e.exam_type as examType, r.score, r.is_passed as isPassed, r.submit_time as submitTime from student_exam_record r join exams e on r.exam_id=e.id where r.student_id=#{studentId} order by r.submit_time desc")
     List<Map<String, Object>> findByStudent(Long studentId);
 
     @Select("select r.id, r.exam_id as examId, r.student_id as studentId, r.score, r.is_passed as isPassed, r.submit_time as submitTime " +

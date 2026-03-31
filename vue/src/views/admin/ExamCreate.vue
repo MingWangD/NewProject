@@ -9,6 +9,12 @@
             <el-option v-for="s in subjects" :key="s.id" :value="s.id" :label="`${s.name}（${s.totalHours}学时）`"/>
           </el-select>
         </el-form-item>
+        <el-form-item label="考试类型">
+          <el-select v-model="form.examType" style="width: 300px">
+            <el-option label="课后测验" value="REGULAR"/>
+            <el-option label="期末考试" value="FINAL"/>
+          </el-select>
+        </el-form-item>
         <el-form-item label="及格分"><el-input-number v-model="form.passScore" :min="1"/></el-form-item>
         <el-form-item label="开始时间"><el-date-picker v-model="form.startTime" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss"/></el-form-item>
         <el-form-item label="结束时间"><el-date-picker v-model="form.endTime" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss"/></el-form-item>
@@ -46,6 +52,9 @@
         <el-table-column prop="id" label="ID" width="80"/>
         <el-table-column prop="name" label="考试名称"/>
         <el-table-column prop="subjectName" label="课程" width="140"/>
+        <el-table-column label="类型" width="120">
+          <template #default="scope">{{ scope.row.examType === 'FINAL' ? '期末考试' : '课后测验' }}</template>
+        </el-table-column>
         <el-table-column prop="startTime" label="开始时间" width="180"/>
         <el-table-column prop="endTime" label="结束时间" width="180"/>
         <el-table-column label="操作" width="120">
@@ -70,13 +79,13 @@ const tableRef = ref()
 const page = ref(1)
 const pageSize = 8
 const selectedIdSet = ref(new Set())
-const form = reactive({ name: '', subjectId: null, passScore: 60, startTime: '', endTime: '', questionIds: [] })
+const form = reactive({ name: '', subjectId: null, examType: 'REGULAR', passScore: 60, startTime: '', endTime: '', questionIds: [] })
 const pagedQuestions = computed(() => questions.value.slice((page.value - 1) * pageSize, page.value * pageSize))
 
 const loadSubjects = async () => subjects.value = (await request.get('/common/subjects')).data
 const loadExamList = async () => {
   const list = (await request.get('/exam/list')).data || []
-  examList.value = list.map(i => ({ ...i, subjectName: i.subject_name || i.subjectName }))
+  examList.value = list.map(i => ({ ...i, subjectName: i.subject_name || i.subjectName, examType: i.examType || i.exam_type }))
 }
 
 const onSubjectChange = async () => {
