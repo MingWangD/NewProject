@@ -52,7 +52,6 @@ public class AdminController {
 
     @GetMapping("/student-course-query")
     public ApiResponse<?> studentCourseQuery(@RequestParam Long studentId, @RequestParam Long subjectId) {
-        gpaService.recalculateAllStudents();
         Map<String, Object> resp = new HashMap<>();
         User student = userMapper.findById(studentId);
         Subject subject = subjectMapper.findById(subjectId);
