@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,6 +61,10 @@ class AdminControllerTest {
         when(subjectMapper.maxTotalHours()).thenReturn(100);
         when(attendanceMapper.totalLoginRecords()).thenReturn(80);
         when(examRecordMapper.passRate()).thenReturn(0.9);
+        when(userMapper.findById(2L)).thenReturn(student);
+        when(subjectMapper.findById(1L)).thenReturn(new com.ttl.warning.entity.Subject());
+        when(examRecordMapper.findRegularRecordsByStudentAndSubject(2L, 1L)).thenReturn(List.of());
+        when(gpaService.subjectGpaDetails(2L)).thenReturn(List.of(Map.of("subjectId", 1L, "status", "PASSED")));
 
         mockMvc.perform(get("/api/admin/attendance"))
                 .andExpect(status().isOk())
@@ -68,5 +74,13 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.data.avgGpa").value(3.2));
+
+        mockMvc.perform(get("/api/admin/students"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"));
+
+        mockMvc.perform(get("/api/admin/student-course-query").param("studentId", "2").param("subjectId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"));
     }
 }

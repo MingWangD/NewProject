@@ -75,8 +75,11 @@ public class GpaService {
             for (Map.Entry<Long, SubjectScores> entry : subjectScores.entrySet()) {
                 Long subjectId = entry.getKey();
                 int credit = creditMap.getOrDefault(subjectId, 0);
-                Double weightedPercent = entry.getValue().weightedPercent();
+                SubjectScores ss = entry.getValue();
+                Double weightedPercent = ss.weightedPercent();
+                Double finalAvgBySubject = ss.finalAvg();
                 if (weightedPercent == null) continue;
+                if (finalAvgBySubject == null || finalAvgBySubject < 60) continue;
                 double point = scoreToPoint((int) Math.round(weightedPercent));
                 totalCredits += credit;
                 totalGradePoint += point * credit;
@@ -101,6 +104,51 @@ public class GpaService {
             gpaRow.setRiskLevel(riskColor(riskProb));
             gpaMapper.upsert(gpaRow);
         }
+    }
+
+
+    public List<Map<String, Object>> subjectGpaDetails(Long studentId) {
+        List<Map<String, Object>> rows = examRecordMapper.findRiskRowsByStudent(studentId);
+        List<Subject> subjects = subjectMapper.findAll();
+
+        Map<Long, SubjectScores> map = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            Long subjectId = ((Number) row.get("subjectId")).longValue();
+            String examType = String.valueOf(row.get("examType"));
+            double percentScore = ((Number) row.get("percentScore")).doubleValue();
+            map.computeIfAbsent(subjectId, k -> new SubjectScores()).add(examType, percentScore);
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Subject subject : subjects) {
+            SubjectScores ss = map.getOrDefault(subject.getId(), new SubjectScores());
+            Double regAvg = ss.regularAvg();
+            Double finalAvg = ss.finalAvg();
+            Double weighted = ss.weightedPercent();
+
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("subjectId", subject.getId());
+            item.put("subjectName", subject.getName());
+            item.put("regularAvg", regAvg == null ? null : Math.round(regAvg * 10.0) / 10.0);
+            item.put("finalAvg", finalAvg == null ? null : Math.round(finalAvg * 10.0) / 10.0);
+
+            if (finalAvg == null) {
+                item.put("status", "NO_FINAL");
+                item.put("subjectGpa", null);
+                item.put("remark", "未参加期末考试");
+            } else if (finalAvg < 60) {
+                item.put("status", "FAILED");
+                item.put("subjectGpa", null);
+                item.put("remark", "期末考试未及格，挂科");
+            } else {
+                double point = scoreToPoint((int) Math.round(weighted == null ? finalAvg : weighted));
+                item.put("status", "PASSED");
+                item.put("subjectGpa", Math.round(point * 10.0) / 10.0);
+                item.put("remark", "有效");
+            }
+            result.add(item);
+        }
+        return result;
     }
 
     private double avg(List<Double> values, double fallback) {
@@ -147,9 +195,17 @@ public class GpaService {
             else regular.add(score);
         }
 
+        Double regularAvg() {
+            return regular.isEmpty() ? null : regular.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        }
+
+        Double finalAvg() {
+            return fin.isEmpty() ? null : fin.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        }
+
         Double weightedPercent() {
-            Double regAvg = regular.isEmpty() ? null : regular.stream().mapToDouble(Double::doubleValue).average().orElse(0);
-            Double finAvg = fin.isEmpty() ? null : fin.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            Double regAvg = regularAvg();
+            Double finAvg = finalAvg();
             if (regAvg == null && finAvg == null) return null;
             if (regAvg == null) return finAvg;
             if (finAvg == null) return regAvg;

@@ -8,6 +8,8 @@ const routes = [
     component: () => import('@/layout/AdminLayout.vue'),
     children: [
       { path: 'exam-create', component: () => import('@/views/admin/ExamCreate.vue') },
+      { path: 'query', component: () => import('@/views/admin/StudentInsight.vue') },
+      { path: 'model-flow', component: () => import('@/views/admin/ModelFlow.vue') },
       { path: 'scores', component: () => import('@/views/admin/ScoreList.vue') },
       { path: 'answers/:recordId', component: () => import('@/views/admin/AnswerDetail.vue') },
       { path: 'attendance', component: () => import('@/views/admin/AttendanceStats.vue') },
@@ -24,7 +26,8 @@ const routes = [
       { path: 'score', component: () => import('@/views/student/ScoreView.vue') },
       { path: 'state', component: () => import('@/views/student/LearnState.vue') },
       { path: 'profile', component: () => import('@/views/student/Profile.vue') },
-      { path: 'timetable', component: () => import('@/views/student/Timetable.vue') }
+      { path: 'timetable', component: () => import('@/views/student/Timetable.vue') },
+      { path: 'subject-gpa', component: () => import('@/views/student/SubjectGpa.vue') }
     ]
   }
 ]

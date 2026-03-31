@@ -13,10 +13,12 @@ import java.util.*;
 public class StudentService {
     private final UserMapper userMapper;
     private final ExamMapper examMapper;
+    private final GpaService gpaService;
 
-    public StudentService(UserMapper userMapper, ExamMapper examMapper) {
+    public StudentService(UserMapper userMapper, ExamMapper examMapper, GpaService gpaService) {
         this.userMapper = userMapper;
         this.examMapper = examMapper;
+        this.gpaService = gpaService;
     }
 
     public User updateProfile(Long studentId, User payload) {
@@ -36,6 +38,10 @@ public class StudentService {
         Map<String, Object> resp = new HashMap<>();
         resp.put("pendingCount", examMapper.countPendingByStudent(studentId));
         return resp;
+    }
+
+    public List<Map<String, Object>> subjectGpaDetails(Long studentId) {
+        return gpaService.subjectGpaDetails(studentId);
     }
 
     public List<Map<String, Object>> weeklyTimetable(LocalDate weekStart) {

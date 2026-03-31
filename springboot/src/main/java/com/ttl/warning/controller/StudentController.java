@@ -62,6 +62,11 @@ public class StudentController {
         return ApiResponse.ok(studentService.pendingExamSummary(studentId));
     }
 
+    @GetMapping("/{studentId}/subject-gpa")
+    public ApiResponse<?> subjectGpa(@PathVariable Long studentId) {
+        return ApiResponse.ok(studentService.subjectGpaDetails(studentId));
+    }
+
     @GetMapping("/{studentId}/timetable")
     public ApiResponse<?> timetable(@PathVariable Long studentId, @RequestParam(required = false) String weekStart) {
         LocalDate date = weekStart == null ? LocalDate.now() : LocalDate.parse(weekStart);

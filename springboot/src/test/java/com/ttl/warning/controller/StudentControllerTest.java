@@ -74,6 +74,7 @@ class StudentControllerTest {
         u.setEmail("stu1@example.com");
         when(userMapper.findById(2L)).thenReturn(u);
         when(studentService.pendingExamSummary(2L)).thenReturn(Map.of("pendingCount", 3));
+        when(studentService.subjectGpaDetails(2L)).thenReturn(List.of(Map.of("subjectId", 1, "status", "PASSED")));
         when(studentService.weeklyTimetable(any())).thenReturn(List.of(Map.of("subject", "高等数学")));
         when(studentService.updateProfile(any(), any())).thenReturn(u);
 
@@ -87,6 +88,10 @@ class StudentControllerTest {
                 .andExpect(jsonPath("$.data.pendingCount").value(3));
 
         mockMvc.perform(get("/api/student/2/timetable").param("weekStart", "2026-03-09"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"));
+
+        mockMvc.perform(get("/api/student/2/subject-gpa"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
 
