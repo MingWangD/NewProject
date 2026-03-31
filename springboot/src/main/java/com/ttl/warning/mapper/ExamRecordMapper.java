@@ -54,4 +54,10 @@ public interface ExamRecordMapper {
     @Select("select r.id, r.exam_id as examId, r.student_id as studentId, r.score, r.is_passed as isPassed, r.submit_time as submitTime " +
             "from student_exam_record r where r.exam_id=#{examId} and r.student_id=#{studentId} limit 1")
     Map<String, Object> findByExamAndStudent(@Param("examId") Long examId, @Param("studentId") Long studentId);
+
+
+    @Select("select r.student_id as studentId, e.subject_id as subjectId, e.exam_type as examType, " +
+            "(r.score * 100.0) / nullif(e.total_score,0) as percentScore, r.is_passed as isPassed " +
+            "from student_exam_record r join exams e on r.exam_id=e.id")
+    List<Map<String, Object>> findAllForRiskModel();
 }

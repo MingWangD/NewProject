@@ -38,6 +38,14 @@ FROM exams e
 JOIN users u ON u.role='STUDENT' AND u.id BETWEEN 2 AND 11
 WHERE e.id BETWEEN 3001 AND 3035;
 
+-- 调整样本成绩分层，确保四种风险颜色都有代表
+UPDATE student_exam_record SET score = LEAST(100, score + 18) WHERE student_id IN (2, 11);
+UPDATE student_exam_record SET score = LEAST(100, score + 8) WHERE student_id IN (3, 9);
+UPDATE student_exam_record SET score = GREATEST(20, score - 6) WHERE student_id IN (4, 8);
+UPDATE student_exam_record SET score = GREATEST(20, score - 14) WHERE student_id IN (5, 10);
+UPDATE student_exam_record SET score = GREATEST(20, score - 24) WHERE student_id IN (6, 7);
+
+
 INSERT IGNORE INTO login_attendance(student_id, login_date)
 SELECT u.id, DATE_ADD('2026-03-01', INTERVAL d.seq DAY)
 FROM users u
