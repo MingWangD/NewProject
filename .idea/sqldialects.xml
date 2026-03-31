@@ -2,6 +2,9 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/springboot/src/main/resources/sql/migrations/20260327_alter_student_gpa_risk_level.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/springboot/src/main/resources/sql/migrations/20260331_add_user_email_and_seed_history.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/springboot/src/main/resources/sql/reset_schema.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/springboot/src/main/resources/sql/schema.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/springboot/src/main/resources/sql/seed_data.sql" dialect="MySQL" />
   </component>
 </project>
