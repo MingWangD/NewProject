@@ -134,7 +134,21 @@ const onPageChange = async (p) => {
 }
 
 const submit = async () => {
+  if (!form.name || !form.name.trim()) return ElMessage.warning('请输入考试名称')
+  if (!form.subjectId) return ElMessage.warning('请选择课程')
+  if (!form.passScore || form.passScore <= 0) return ElMessage.warning('及格分必须大于0')
+  if (!form.startTime || !form.endTime) return ElMessage.warning('请选择开始和结束时间')
+  if (new Date(form.startTime).getTime() >= new Date(form.endTime).getTime()) {
+    return ElMessage.warning('开始时间必须早于结束时间')
+  }
+  if (!['REGULAR', 'FINAL'].includes(form.examType)) {
+    return ElMessage.warning('考试类型仅支持课后测验或期末考试')
+  }
   if (!form.questionIds.length) return ElMessage.warning('请至少选择1道题')
+  const totalScore = questions.value
+    .filter(q => form.questionIds.includes(q.id))
+    .reduce((sum, q) => sum + (q.score || 0), 0)
+  if (form.passScore > totalScore) return ElMessage.warning(`及格分不能大于总分（当前总分 ${totalScore}）`)
   const res = await request.post('/exam/create', form)
   if (res.code === '200') {
     ElMessage.success('发布成功')

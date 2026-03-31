@@ -12,12 +12,12 @@
         <el-table :data="typeGroup.items" border>
           <el-table-column prop="name" label="考试名称"/>
           <el-table-column prop="subjectName" label="课程" width="140"/>
-          <el-table-column label="出勤门槛" width="250">
+          <el-table-column label="学习活跃度门槛" width="280">
             <template #default="scope">
               <el-tag v-if="scope.row.examType==='FINAL'" :type="scope.row.canAttend ? 'success' : 'danger'">
-                {{scope.row.attendance}} / {{scope.row.requiredAttendance}} ({{ scope.row.canAttend ? '达标' : '不达标' }})
+                累计登录 {{scope.row.attendance}} / {{scope.row.requiredAttendance}} 次（{{ scope.row.canAttend ? '达标' : '不达标' }}）
               </el-tag>
-              <el-tag v-else type="info">平时考试无需出勤门槛</el-tag>
+              <el-tag v-else type="info">课后测验不受累计登录次数门槛限制</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="240">

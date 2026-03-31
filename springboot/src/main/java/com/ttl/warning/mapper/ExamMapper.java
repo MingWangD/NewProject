@@ -18,7 +18,9 @@ public interface ExamMapper {
     @Select("select e.*, s.name as subject_name from exams e left join subjects s on e.subject_id=s.id order by e.id desc")
     List<Map<String, Object>> findAllWithSubject();
 
-    @Select("select count(*) from exams e left join student_exam_record r on e.id=r.exam_id and r.student_id=#{studentId} where r.id is null")
+    @Select("select count(*) from exams e " +
+            "left join student_exam_record r on e.id=r.exam_id and r.student_id=#{studentId} " +
+            "where r.id is null and now() between e.start_time and e.end_time")
     int countPendingByStudent(Long studentId);
 
     @Delete("delete from exam_question where exam_id=#{examId}")

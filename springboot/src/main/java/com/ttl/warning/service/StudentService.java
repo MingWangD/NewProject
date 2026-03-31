@@ -45,6 +45,7 @@ public class StudentService {
     }
 
     public List<Map<String, Object>> weeklyTimetable(LocalDate weekStart) {
+        // 当前返回的是本学期公共示例课表，不区分学生个体
         LocalDate semesterStart = LocalDate.of(2026, 3, 1);
         LocalDate semesterEnd = LocalDate.of(2026, 6, 30);
         LocalDate monday = weekStart.with(DayOfWeek.MONDAY);

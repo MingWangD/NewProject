@@ -3,7 +3,6 @@ package com.ttl.warning.service;
 import com.ttl.warning.entity.StudentGpa;
 import com.ttl.warning.entity.Subject;
 import com.ttl.warning.entity.User;
-import com.ttl.warning.mapper.AttendanceMapper;
 import com.ttl.warning.mapper.ExamRecordMapper;
 import com.ttl.warning.mapper.GpaMapper;
 import com.ttl.warning.mapper.SubjectMapper;
@@ -18,52 +17,35 @@ public class GpaService {
     private final SubjectMapper subjectMapper;
     private final GpaMapper gpaMapper;
     private final UserMapper userMapper;
-    private final AttendanceMapper attendanceMapper;
 
     public GpaService(ExamRecordMapper examRecordMapper, SubjectMapper subjectMapper, GpaMapper gpaMapper,
-                      UserMapper userMapper, AttendanceMapper attendanceMapper) {
+                      UserMapper userMapper) {
         this.examRecordMapper = examRecordMapper;
         this.subjectMapper = subjectMapper;
         this.gpaMapper = gpaMapper;
         this.userMapper = userMapper;
-        this.attendanceMapper = attendanceMapper;
     }
 
     public void recalculateAllStudents() {
         List<Map<String, Object>> rows = examRecordMapper.findAllForRiskModel();
         List<Subject> subjects = subjectMapper.findAll();
         Map<Long, Integer> creditMap = new HashMap<>();
-        int maxHours = 0;
         for (Subject s : subjects) {
             creditMap.put(s.getId(), s.getCredit());
-            maxHours = Math.max(maxHours, s.getTotalHours());
         }
 
         Map<Long, Map<Long, SubjectScores>> byStudentSubject = new HashMap<>();
-        Map<Long, List<Double>> regularScores = new HashMap<>();
-        Map<Long, List<Double>> finalScores = new HashMap<>();
-        Map<Long, Integer> passCount = new HashMap<>();
-        Map<Long, Integer> totalCount = new HashMap<>();
 
         for (Map<String, Object> row : rows) {
             Long studentId = ((Number) row.get("studentId")).longValue();
             Long subjectId = ((Number) row.get("subjectId")).longValue();
             String examType = String.valueOf(row.get("examType"));
             double percentScore = ((Number) row.get("percentScore")).doubleValue();
-            int isPassed = ((Number) row.get("isPassed")).intValue();
 
             byStudentSubject
                     .computeIfAbsent(studentId, k -> new HashMap<>())
                     .computeIfAbsent(subjectId, k -> new SubjectScores())
                     .add(examType, percentScore);
-
-            if ("FINAL".equalsIgnoreCase(examType)) {
-                finalScores.computeIfAbsent(studentId, k -> new ArrayList<>()).add(percentScore);
-            } else {
-                regularScores.computeIfAbsent(studentId, k -> new ArrayList<>()).add(percentScore);
-            }
-            passCount.put(studentId, passCount.getOrDefault(studentId, 0) + (isPassed == 1 ? 1 : 0));
-            totalCount.put(studentId, totalCount.getOrDefault(studentId, 0) + 1);
         }
 
         for (User student : userMapper.findStudents()) {
@@ -87,25 +69,20 @@ public class GpaService {
 
             double gpa = totalCredits == 0 ? 0 : Math.round((totalGradePoint / totalCredits) * 10.0) / 10.0;
 
-            double regularAvg = avg(regularScores.get(studentId), 55);
-            double finalAvg = avg(finalScores.get(studentId), regularAvg);
-            double passRate = totalCount.getOrDefault(studentId, 0) == 0 ? 0
-                    : passCount.getOrDefault(studentId, 0) * 1.0 / totalCount.get(studentId);
-            double attendanceRate = maxHours == 0 ? 0
-                    : Math.min(attendanceMapper.countByStudent(studentId) * 1.0 / maxHours, 1.0);
-
-            double riskProb = logisticRisk(regularAvg, finalAvg, attendanceRate, passRate);
-
             StudentGpa gpaRow = new StudentGpa();
             gpaRow.setStudentId(studentId);
             gpaRow.setTotalCredits(totalCredits);
             gpaRow.setTotalGradePoint(Math.round(totalGradePoint * 100.0) / 100.0);
             gpaRow.setGpa(gpa);
-            gpaRow.setRiskLevel(riskColor(riskProb));
+            gpaRow.setRiskLevel(riskColorByGpa(gpa));
             gpaMapper.upsert(gpaRow);
         }
     }
-
+    
+    public void recalculateStudent(Long studentId) {
+        if (studentId == null) return;
+        recalculateAllStudents();
+    }
 
     public List<Map<String, Object>> subjectGpaDetails(Long studentId) {
         List<Map<String, Object>> rows = examRecordMapper.findRiskRowsByStudent(studentId);
@@ -151,24 +128,10 @@ public class GpaService {
         return result;
     }
 
-    private double avg(List<Double> values, double fallback) {
-        if (values == null || values.isEmpty()) return fallback;
-        return values.stream().mapToDouble(Double::doubleValue).average().orElse(fallback);
-    }
-
-    private double logisticRisk(double regularAvg, double finalAvg, double attendanceRate, double passRate) {
-        double z = 3.2
-                - 0.035 * regularAvg
-                - 0.045 * finalAvg
-                - 2.2 * attendanceRate
-                - 1.8 * passRate;
-        return 1.0 / (1.0 + Math.exp(-z));
-    }
-
-    private String riskColor(double riskProbability) {
-        if (riskProbability >= 0.75) return "RED";
-        if (riskProbability >= 0.55) return "ORANGE";
-        if (riskProbability >= 0.35) return "YELLOW";
+    private String riskColorByGpa(double gpa) {
+        if (gpa < 1.5) return "RED";
+        if (gpa < 2.0) return "ORANGE";
+        if (gpa < 2.5) return "YELLOW";
         return "GREEN";
     }
 
