@@ -73,4 +73,14 @@ public class ExamController {
     public ApiResponse<?> recordMeta(@PathVariable Long recordId) {
         return ApiResponse.ok(examRecordMapper.findRecordMeta(recordId));
     }
+
+    @DeleteMapping("/{examId}/revoke")
+    public ApiResponse<?> revoke(@PathVariable Long examId) {
+        try {
+            examService.revokeExam(examId);
+            return ApiResponse.ok("撤销成功");
+        } catch (Exception e) {
+            return ApiResponse.fail(e.getMessage());
+        }
+    }
 }

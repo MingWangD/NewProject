@@ -50,6 +50,7 @@ public class ExamService {
         exam.setPassScore(req.getPassScore());
         exam.setStartTime(req.getStartTime());
         exam.setEndTime(req.getEndTime());
+        exam.setExamType(req.getExamType() == null ? "REGULAR" : req.getExamType());
         exam.setTotalScore(totalScore);
         examMapper.insert(exam);
         for (Long qid : req.getQuestionIds()) {
@@ -62,12 +63,14 @@ public class ExamService {
         Exam exam = examMapper.findById(examId);
         Subject subject = subjectMapper.findById(exam.getSubjectId());
         int attendance = attendanceMapper.countByStudent(studentId);
-        int required = (int) Math.ceil(subject.getTotalHours() * 2.0 / 3.0);
+        boolean isFinal = "FINAL".equalsIgnoreCase(exam.getExamType());
+        int required = isFinal ? (int) Math.ceil(subject.getTotalHours() * 2.0 / 3.0) : 0;
         Map<String, Object> result = new HashMap<>();
-        result.put("canAttend", attendance >= required);
+        result.put("canAttend", !isFinal || attendance >= required);
         result.put("attendance", attendance);
         result.put("requiredAttendance", required);
         result.put("subjectHours", subject.getTotalHours());
+        result.put("attendanceRule", isFinal ? "FINAL_REQUIRED" : "NONE");
         return result;
     }
 
@@ -129,4 +132,16 @@ public class ExamService {
         resp.put("gpa", gpaMapper.findByStudent(req.getStudentId()));
         return resp;
     }
+
+    @Transactional
+    public void revokeExam(Long examId) {
+        if (examRecordMapper.countByExam(examId) > 0) {
+            throw new RuntimeException("已有学生完成该考试，无法撤销");
+        }
+        examMapper.deleteQuestionsByExam(examId);
+        if (examMapper.deleteExam(examId) == 0) {
+            throw new RuntimeException("考试不存在或已删除");
+        }
+    }
+
 }

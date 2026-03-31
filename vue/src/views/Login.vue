@@ -16,7 +16,7 @@
 <script setup>
 import { reactive } from 'vue'
 import request from '@/utils/request'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import router from '@/router'
 
 const form = reactive({ username: 'stu1', password: '123456', role: 'STUDENT' })
@@ -26,6 +26,10 @@ const login = async () => {
   if (res.code === '200') {
     localStorage.setItem('user', JSON.stringify(res.data))
     ElMessage.success('登录成功')
+    if (form.role === 'STUDENT') {
+      const pending = await request.get(`/student/${res.data.id}/pending-exams`)
+      await ElMessageBox.alert(`你当前还有 ${pending.data.pendingCount} 门考试未完成，请合理安排时间。`, '考试提醒', { confirmButtonText: '我知道了' })
+    }
     router.push(form.role === 'ADMIN' ? '/admin/exam-create' : '/student/exams')
   } else ElMessage.error(res.message)
 }
