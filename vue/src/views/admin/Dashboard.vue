@@ -39,6 +39,7 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import * as echarts from 'echarts'
 import request from '@/utils/request'
 
 const data = ref({})
@@ -47,7 +48,6 @@ const riskChartRef = ref(null)
 const metricChartRef = ref(null)
 let riskChart = null
 let metricChart = null
-let echartsLib = null
 
 const fmt = (v) => ((v ?? 0).toFixed ? (v ?? 0).toFixed(2) : v)
 const pct = (v) => `${((v ?? 0) * 100).toFixed(1)}%`
