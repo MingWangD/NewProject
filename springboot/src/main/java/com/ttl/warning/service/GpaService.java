@@ -79,7 +79,7 @@ public class GpaService {
                 Double weightedPercent = ss.weightedPercent();
                 Double finalAvgBySubject = ss.finalAvg();
                 if (weightedPercent == null) continue;
-                if (finalAvgBySubject == null || finalAvgBySubject < 60) continue;
+                if (finalAvgBySubject != null && finalAvgBySubject < 60) continue;
                 double point = scoreToPoint((int) Math.round(weightedPercent));
                 totalCredits += credit;
                 totalGradePoint += point * credit;
