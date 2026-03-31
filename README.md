@@ -39,6 +39,8 @@
    `springboot/src/main/resources/sql/migrations/20260327_alter_student_gpa_risk_level.sql`
 4. 如果你的题库历史数据出现重复（例如同题带“第N题”后缀），请执行：
    `springboot/src/main/resources/sql/migrations/20260327_deduplicate_question_bank.sql`
+5. 本次新增学生邮箱字段与历史考试样本（10名学生、每科7次），旧库升级请执行：
+   `springboot/src/main/resources/sql/migrations/20260331_add_user_email_and_seed_history.sql`
 
 ### 后端
 ```bash
@@ -64,6 +66,7 @@ npm run dev
 ### 考试
 - `POST /api/exam/create`：管理员在课程下发布考试（题库勾选组卷）
 - `GET /api/exam/list`：考试列表
+- `DELETE /api/exam/{examId}/revoke`：撤销未被任何学生完成的考试（会删除考试与组卷关联）
 - `GET /api/exam/{examId}/questions`：考试题目
 - `GET /api/exam/{examId}/can-attend/{studentId}`：校验出勤门槛（返回当前出勤、要求出勤）
 - `POST /api/exam/submit`：提交考试并自动判题/算分/GPA刷新
@@ -72,6 +75,10 @@ npm run dev
 
 ### 学生
 - `GET /api/student/{studentId}/state`：学习状态（成绩/GPA/风险/出勤）
+- `GET /api/student/{studentId}/profile`：个人资料
+- `PUT /api/student/{studentId}/profile`：更新姓名/学号ID/邮箱
+- `GET /api/student/{studentId}/pending-exams`：未完成考试数量
+- `GET /api/student/{studentId}/timetable?weekStart=YYYY-MM-DD`：按周查看课程表（2026年3月-6月）
 
 ### 管理员
 - `GET /api/admin/attendance`：学生出勤统计

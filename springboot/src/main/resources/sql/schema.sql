@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(100) NOT NULL,
   real_name VARCHAR(50) NOT NULL,
   role ENUM('ADMIN','STUDENT') NOT NULL,
+  email VARCHAR(100) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -111,13 +112,18 @@ INSERT IGNORE INTO subjects(id, name, credit, total_hours) VALUES
 (4,'计算机网络',3,32),
 (5,'Java程序设计',4,64);
 
-INSERT IGNORE INTO users(id, username, password, real_name, role) VALUES
-(1,'admin','123456','管理员','ADMIN'),
-(2,'stu1','123456','张三','STUDENT'),
-(3,'stu2','123456','李四','STUDENT'),
-(4,'stu3','123456','王五','STUDENT'),
-(5,'stu4','123456','赵六','STUDENT'),
-(6,'stu5','123456','孙七','STUDENT');
+INSERT IGNORE INTO users(id, username, password, real_name, role, email) VALUES
+(1,'admin','123456','管理员','ADMIN','admin@study.local'),
+(2,'stu1','123456','张三','STUDENT','stu1@study.local'),
+(3,'stu2','123456','李四','STUDENT','stu2@study.local'),
+(4,'stu3','123456','王五','STUDENT','stu3@study.local'),
+(5,'stu4','123456','赵六','STUDENT','stu4@study.local'),
+(6,'stu5','123456','孙七','STUDENT','stu5@study.local'),
+(7,'stu6','123456','钱八','STUDENT','stu6@study.local'),
+(8,'stu7','123456','周九','STUDENT','stu7@study.local'),
+(9,'stu8','123456','吴十','STUDENT','stu8@study.local'),
+(10,'stu9','123456','郑十一','STUDENT','stu9@study.local'),
+(11,'stu10','123456','王十二','STUDENT','stu10@study.local');
 
 INSERT IGNORE INTO question_bank(id,subject_id,content,option_a,option_b,option_c,option_d,correct_option,score) VALUES
 (1000,1,'函数f(x)=x^2在x=1处导数是','1','2','3','4','B',5),
@@ -579,3 +585,30 @@ SELECT 48 seq
 UNION ALL
 SELECT 49 seq
 ) t;
+
+
+-- 历史考试样本数据：10名学生 * 5门科目 * 每门7场考试
+INSERT IGNORE INTO exams(id, name, subject_id, total_score, pass_score, start_time, end_time)
+SELECT 3000 + (s.id - 1) * 7 + n.seq + 1 AS id,
+       CONCAT(s.name, '-阶段测验', n.seq + 1) AS name,
+       s.id,
+       100 AS total_score,
+       60 AS pass_score,
+       DATE_ADD('2026-03-03 09:00:00', INTERVAL ((s.id - 1) * 2 + n.seq * 5) DAY) AS start_time,
+       DATE_ADD('2026-03-03 11:00:00', INTERVAL ((s.id - 1) * 2 + n.seq * 5) DAY) AS end_time
+FROM subjects s
+JOIN (
+  SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+  SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6
+) n
+WHERE s.id BETWEEN 1 AND 5;
+
+INSERT IGNORE INTO student_exam_record(exam_id, student_id, score, is_passed, submit_time)
+SELECT e.id AS exam_id,
+       u.id AS student_id,
+       (35 + ((u.id * 13 + e.id * 7) % 66)) AS score,
+       CASE WHEN (35 + ((u.id * 13 + e.id * 7) % 66)) >= 60 THEN 1 ELSE 0 END AS is_passed,
+       DATE_ADD(e.end_time, INTERVAL 1 DAY) AS submit_time
+FROM exams e
+JOIN users u ON u.role='STUDENT' AND u.id BETWEEN 2 AND 11
+WHERE e.id BETWEEN 3001 AND 3035;

@@ -18,6 +18,9 @@ public interface ExamRecordMapper {
     @Select("select count(*) from student_exam_record where exam_id=#{examId} and student_id=#{studentId}")
     int countByExamAndStudent(@Param("examId") Long examId, @Param("studentId") Long studentId);
 
+    @Select("select count(*) from student_exam_record where exam_id=#{examId}")
+    int countByExam(Long examId);
+
     @Select("select r.id, r.score, r.is_passed as isPassed, r.submit_time, u.real_name as studentName from student_exam_record r join users u on r.student_id=u.id where r.exam_id=#{examId} order by r.submit_time desc")
     List<Map<String, Object>> findScoresByExam(Long examId);
 

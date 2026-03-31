@@ -129,4 +129,16 @@ public class ExamService {
         resp.put("gpa", gpaMapper.findByStudent(req.getStudentId()));
         return resp;
     }
+
+    @Transactional
+    public void revokeExam(Long examId) {
+        if (examRecordMapper.countByExam(examId) > 0) {
+            throw new RuntimeException("已有学生完成该考试，无法撤销");
+        }
+        examMapper.deleteQuestionsByExam(examId);
+        if (examMapper.deleteExam(examId) == 0) {
+            throw new RuntimeException("考试不存在或已删除");
+        }
+    }
+
 }
