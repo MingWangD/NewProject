@@ -73,6 +73,7 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public ApiResponse<?> dashboard() {
+        gpaService.recalculateAllStudents();
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> risk = gpaMapper.riskStats();
         map.put("risk", risk);
