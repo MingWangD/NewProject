@@ -39,14 +39,15 @@
 
 ## 7. 启动说明
 ### 数据库
-1. 创建 MySQL 数据库并执行：`springboot/src/main/resources/sql/schema.sql`
-2. 脚本已初始化：管理员、多个学生、固定课程、每门课程20题（共100题）、以及“部分出勤达标/不达标”的登录记录。
-3. 如果你是从旧版本升级（`risk_level` 仍是 ENUM 或旧值），请额外执行：
-   `springboot/src/main/resources/sql/migrations/20260327_alter_student_gpa_risk_level.sql`
-4. 如果你的题库历史数据出现重复（例如同题带“第N题”后缀），请执行：
-   `springboot/src/main/resources/sql/migrations/20260327_deduplicate_question_bank.sql`
-5. 本次新增学生邮箱字段与历史考试样本（10名学生、每科7次），旧库升级请执行：
-   `springboot/src/main/resources/sql/migrations/20260331_add_user_email_and_seed_history.sql`
+> 现已统一为“两份 SQL”模式：
+> 1) 删库/建表：`springboot/src/main/resources/sql/reset_schema.sql`
+> 2) 初始化/样本数据：`springboot/src/main/resources/sql/seed_data.sql`
+
+执行顺序：
+1. `source springboot/src/main/resources/sql/reset_schema.sql`
+2. `source springboot/src/main/resources/sql/seed_data.sql`
+
+说明：`seed_data.sql` 末尾已包含 GPA/风险等级同步语句，风险看板可直接与样本数据一致。
 
 ### 后端
 ```bash
