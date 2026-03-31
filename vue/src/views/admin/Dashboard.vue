@@ -56,26 +56,28 @@ const tagType = (r) => ({ RED: 'danger', ORANGE: 'warning', YELLOW: 'warning', G
 const desc = (r) => ({ RED: 'GPA < 1.5', ORANGE: '1.5 ≤ GPA < 2.0', YELLOW: '2.0 ≤ GPA < 2.5', GREEN: 'GPA ≥ 2.5' }[r] || '-')
 const color = (r) => ({ RED: '#f56c6c', ORANGE: '#e6a23c', YELLOW: '#f2c94c', GREEN: '#67c23a' }[r] || '#909399')
 
-const ensureEcharts = async () => {
+const loadEcharts = async () => {
   if (echartsLib) return echartsLib
-  if (window.echarts) {
+  try {
+    const pkg = 'echarts'
+    echartsLib = await import(pkg)
+    return echartsLib
+  } catch (e) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js'
+      script.onload = resolve
+      script.onerror = reject
+      document.head.appendChild(script)
+    })
     echartsLib = window.echarts
     return echartsLib
   }
-  await new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js'
-    script.onload = resolve
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
-  echartsLib = window.echarts
-  return echartsLib
 }
 
 const renderCharts = async () => {
   await nextTick()
-  const echarts = await ensureEcharts()
+  const echarts = await loadEcharts()
   if (riskChartRef.value) {
     riskChart ??= echarts.init(riskChartRef.value)
     riskChart.setOption({
